@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — Historical View</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080810;
+    --surface: #0e0e1a;
+    --surface2: #141428;
+    --border: #1e1e35;
+    --accent: #c8f135;
+    --orange: #ff7a2f;
+    --pink: #ff3580;
+    --blue: #3574f1;
+    --purple: #9b5de5;
+    --teal: #00d4aa;
+    --red: #ff3535;
+    --gold: #ffcc00;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --muted2: #2a2a45;
+
+    /* vitality score colours */
+    --score-10: #c8f135;
+    --score-9:  #a8e020;
+    --score-8:  #7ec825;
+    --score-7:  #52b030;
+    --score-6:  #f0c040;
+    --score-5:  #e09020;
+    --score-4:  #d06018;
+    --score-3:  #c03020;
+    --score-2:  #901818;
+    --score-1:  #500808;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 58px 1fr;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,16,0.98);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .topbar-nav { display:flex; gap:6px; }
+
+  .tab-btn {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:10px; padding:5px 14px; cursor:pointer;
+    letter-spacing:0.08em; text-transform:uppercase; transition:all 0.15s;
+  }
+  .tab-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .tab-btn.active { background:var(--accent); color:#000; border-color:var(--accent); font-weight:600; }
+
+  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .date-chip { font-size:10px; color:var(--muted); }
+
+  .back-btn {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:10px; padding:6px 14px; cursor:pointer;
+    letter-spacing:0.06em; text-transform:uppercase; transition:all 0.15s;
+  }
+  .back-btn:hover { border-color:var(--text); color:var(--text); }
+
+  /* ── MAIN LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    overflow: hidden;
+  }
+
+  /* ── LEFT: CALENDAR AREA ── */
+  .cal-area {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .cal-controls { display:flex; align-items:center; gap:8px; }
+
+  .cal-nav {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:14px; width:32px; height:32px;
+    cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center;
+  }
+  .cal-nav:hover { border-color:var(--accent); color:var(--accent); }
+
+  .cal-month-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  /* VIEW MODE TOGGLE */
+  .view-toggle { display:flex; gap:2px; }
+  .vt-btn {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:9px; padding:5px 10px; cursor:pointer;
+    letter-spacing:0.08em; text-transform:uppercase; transition:all 0.15s;
+  }
+  .vt-btn:hover { color:var(--text); }
+  .vt-btn.active { background:var(--surface2); color:var(--text); border-color:var(--muted); }
+
+  /* SCORE LEGEND */
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .legend-label { font-size:9px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-right:4px; }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size:9px;
+    color:var(--muted);
+  }
+
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  /* ── MONTH CALENDAR GRID ── */
+  .month-view { display:flex; flex-direction:column; gap:2px; }
+
+  .month-view.hidden { display:none; }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+
+  .cal-weekday {
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 4px 0;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    position: relative;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    overflow: hidden;
+    min-height: 56px;
+  }
+
+  .cal-day:hover { border-color: rgba(255,255,255,0.2); transform: scale(1.04); z-index: 2; }
+  .cal-day.selected { border-color: white !important; z-index: 3; }
+  .cal-day.empty { background: transparent; cursor:default; }
+  .cal-day.empty:hover { transform:none; border-color:transparent; }
+  .cal-day.today { border-color: rgba(255,255,255,0.35) !important; }
+
+  .day-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+
+  .cal-day:hover .day-bg { opacity: 1; }
+
+  .day-num {
+    position: absolute;
+    top: 5px;
+    left: 7px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    z-index: 2;
+    line-height: 1;
+  }
+
+  .day-score-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    z-index: 2;
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* event dots */
+  .day-dots {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    display: flex;
+    gap: 2px;
+    z-index: 2;
+  }
+
+  .day-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+  }
+
+  /* Future / no-data days */
+  .cal-day.no-data .day-bg { background: var(--surface2); opacity:1; }
+  .cal-day.no-data .day-num { color: var(--muted); text-shadow: none; }
+
+  /* ── WEEK VIEW ── */
+  .week-view { display:none; flex-direction:column; gap:3px; }
+  .week-view.visible { display:flex; }
+
+  .week-row {
+    display: grid;
+    grid-template-columns: 80px repeat(7,1fr);
+    gap: 3px;
+    align-items: stretch;
+  }
+
+  .week-label {
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .week-day-cell {
+    height: 52px;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .week-day-cell:hover { border-color: rgba(255,255,255,0.2); }
+  .week-day-cell.selected { border-color: white !important; }
+  .week-day-cell.no-data { background: var(--surface2); cursor: default; }
+
+  /* ── YEAR HEATMAP ── */
+  .year-view { display:none; }
+  .year-view.visible { display:block; }
+
+  .year-months {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .year-month-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .year-month-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 4px;
+  }
+
+  .year-month-grid {
+    display: grid;
+    grid-template-columns: repeat(31, 1fr);
+    gap: 2px;
+  }
+
+  .year-day-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    min-width: 10px;
+  }
+
+  .year-day-cell:hover { transform: scale(1.4); z-index: 2; }
+  .year-day-cell.no-data { background: var(--surface2); cursor:default; }
+  .year-day-cell.no-data:hover { transform:none; }
+
+  /* ── SECTOR SPARKLINE ROWS ── */
+  .sparkline-section { margin-top: 4px; }
+
+  .sparkline-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sparkline-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 36px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sparkline-name {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .sparkline-bar-track {
+    height: 8px;
+    background: var(--muted2);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .sparkline-bar-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 0.6s ease;
+  }
+
+  .sparkline-val {
+    font-size: 10px;
+    text-align: right;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+
+  /* ── RIGHT PANEL: DAY DETAIL ── */
+  .detail-panel {
+    border-left: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .detail-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .detail-date {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .detail-score-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .detail-vitality {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .detail-vitality-label {
+    font-size: 10px;
+    color: var(--muted);
+    padding-bottom: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .detail-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .detail-section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-label { color: var(--muted); }
+  .metric-value { font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  .event-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .event-item:last-child { border-bottom: none; }
+
+  .event-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .event-time { color: var(--muted); font-size: 10px; }
+
+  .ai-analysis {
+    background: linear-gradient(135deg, rgba(0,212,170,0.06), rgba(53,116,241,0.04));
+    border: 1px solid rgba(0,212,170,0.15);
+    padding: 14px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .ai-label {
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ai-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 6px var(--teal);
+  }
+
+  .why-chip {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin: 3px 3px 0 0;
+    letter-spacing: 0.06em;
+  }
+
+  .chip-positive { background: rgba(200,241,53,0.12); color: var(--accent); border: 1px solid rgba(200,241,53,0.2); }
+  .chip-warning  { background: rgba(255,122,47,0.12);  color: var(--orange); border: 1px solid rgba(255,122,47,0.2); }
+  .chip-neutral  { background: rgba(90,90,122,0.2);    color: var(--muted);  border: 1px solid var(--border); }
+
+  .placeholder-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 10px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .placeholder-icon { font-size: 32px; opacity: 0.3; }
+  .placeholder-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 2px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(6px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .cal-grid, .week-view, .year-view { animation: fadeIn 0.25s ease; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">APEX</div>
+  <div class="topbar-nav">
+    <button class="tab-btn" onclick="window.location='APEX_prototype.html'">Dashboard</button>
+    <button class="tab-btn" onclick="window.location='APEX_prototype.html'">Insights</button>
+    <button class="tab-btn active">History</button>
+    <button class="tab-btn">Chat</button>
+  </div>
+  <div class="topbar-right">
+    <span class="date-chip">FRI 27 FEB 2026 · 09:14</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="layout">
+
+  <!-- LEFT: CALENDAR -->
+  <div class="cal-area">
+
+    <!-- Header -->
+    <div class="cal-header">
+      <div>
+        <div class="cal-title" id="page-title">Historical View</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Click any day to inspect. Colour = Vitality Score (composite of energy, mood, sleep, SR, libido).</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="view-toggle">
+          <button class="vt-btn active" onclick="setView('month')">Month</button>
+          <button class="vt-btn" onclick="setView('week')">Week</button>
+          <button class="vt-btn" onclick="setView('year')">Year</button>
+        </div>
+        <div class="cal-controls">
+          <button class="cal-nav" onclick="navPrev()">‹</button>
+          <div class="cal-month-label" id="cal-month-label">February 2026</div>
+          <button class="cal-nav" onclick="navNext()">›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <span class="legend-label">Vitality</span>
+      <div class="legend-item"><div class="legend-swatch" style="background:#500808"></div>1–2</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c03020"></div>3–4</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#e09020"></div>5–6</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#52b030"></div>7–8</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c8f135"></div>9–10</div>
+      <div class="legend-item" style="margin-left:12px"><div class="legend-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>No data</div>
+      <div class="legend-item" style="margin-left:6px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--blue)"></div>Gym
+      </div>
+      <div class="legend-item">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--pink)"></div>Social
+      </div>
+      <div class="legend-item">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--gold)"></div>Work
+      </div>
+    </div>
+
+    <!-- MONTH VIEW -->
+    <div id="month-view" class="month-view">
+      <div class="cal-weekdays">
+        <div class="cal-weekday">Mon</div>
+        <div class="cal-weekday">Tue</div>
+        <div class="cal-weekday">Wed</div>
+        <div class="cal-weekday">Thu</div>
+        <div class="cal-weekday">Fri</div>
+        <div class="cal-weekday">Sat</div>
+        <div class="cal-weekday">Sun</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <!-- WEEK VIEW -->
+    <div id="week-view" class="week-view">
+      <div class="cal-weekdays" style="grid-template-columns:80px repeat(7,1fr);display:grid;gap:3px;margin-bottom:0">
+        <div></div>
+        <div class="cal-weekday">Mon</div>
+        <div class="cal-weekday">Tue</div>
+        <div class="cal-weekday">Wed</div>
+        <div class="cal-weekday">Thu</div>
+        <div class="cal-weekday">Fri</div>
+        <div class="cal-weekday">Sat</div>
+        <div class="cal-weekday">Sun</div>
+      </div>
+      <div id="week-grid"></div>
+    </div>
+
+    <!-- YEAR VIEW -->
+    <div id="year-view" class="year-view">
+      <div class="year-months" id="year-grid"></div>
+    </div>
+
+    <!-- SECTOR SPARKLINES (month avg) -->
+    <div class="sparkline-section" id="sparkline-section">
+      <div class="detail-section-title" style="margin-bottom:12px">Month Averages</div>
+      <div class="sparkline-rows" id="sparkline-rows"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: DAY DETAIL -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="placeholder-state" id="detail-placeholder">
+      <div class="placeholder-icon">◈</div>
+      <div class="placeholder-text">Select any day to see a full breakdown — vitality score, metrics, calendar events, and APEX's analysis of why that day rated the way it did.</div>
+    </div>
+    <div id="detail-content" style="display:none;flex-direction:column;">
+      <div class="detail-header">
+        <div class="detail-date" id="d-date"></div>
+        <div class="detail-score-row">
+          <div class="detail-vitality" id="d-score"></div>
+          <div class="detail-vitality-label">Vitality Score</div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div>
+          <div class="detail-section-title">Metrics</div>
+          <div id="d-metrics"></div>
+        </div>
+        <div>
+          <div class="detail-section-title">Calendar Events</div>
+          <div id="d-events"></div>
+        </div>
+        <div>
+          <div class="detail-section-title">APEX Analysis</div>
+          <div class="ai-analysis" id="d-analysis"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Generate rich fake data for past months
+function scoreToColor(s) {
+  if (!s) return null;
+  const stops = [
+    [0,  '#080810'],
+    [1,  '#500808'],
+    [2,  '#7a1010'],
+    [3,  '#c03020'],
+    [4,  '#d06018'],
+    [5,  '#e09020'],
+    [6,  '#f0c040'],
+    [7,  '#52b030'],
+    [8,  '#7ec825'],
+    [9,  '#a8e020'],
+    [10, '#c8f135'],
+  ];
+  const idx = Math.max(0, Math.min(10, Math.round(s)));
+  return stops[idx][1];
+}
+
+// Each day entry
+function makeDayData(year, month, day, srDay) {
+  // deterministic pseudo-random based on date
+  const seed = year * 10000 + month * 100 + day;
+  const r = (n) => ((seed * 9301 + n * 49297 + 233) % 233280) / 233280;
+
+  const isFuture = new Date(year, month, day) > new Date(2026, 1, 27);
+  if (isFuture) return null;
+
+  // SR boosts score
+  const srBoost = Math.min(srDay / 10, 1.5);
+  const base = 4 + r(1) * 4;
+  const energy = Math.min(10, Math.round((base + srBoost * 1.5 + r(2) * 2) * 10) / 10);
+  const mood   = Math.min(10, Math.round((base + srBoost * 1.2 + r(3) * 2) * 10) / 10);
+  const libido = Math.min(10, Math.round((base + srBoost * 1.8 + r(4) * 2) * 10) / 10);
+  const sleepH = Math.round((5.5 + r(5) * 4) * 10) / 10;
+  const sleepScore = sleepH >= 8 ? 2 : sleepH >= 7 ? 1 : sleepH >= 6 ? 0 : -1;
+  const vitality = Math.min(10, Math.max(1, Math.round(((energy + mood + libido) / 3 + sleepScore) * 10) / 10));
+
+  const hasGym = r(6) > 0.55 && srDay > 2;
+  const hasSocial = r(7) > 0.7;
+  const hasWork = day % 7 !== 0 && day % 7 !== 6;
+
+  const events = [];
+  if (hasGym) events.push({ type: 'gym', label: 'Gym session', time: '18:00', color: 'var(--orange)' });
+  if (hasSocial && r(8) > 0.5) events.push({ type: 'social', label: r(9) > 0.5 ? 'Dinner with Mia' : 'Catch up w/ friends', time: '19:30', color: 'var(--pink)' });
+  if (hasWork && r(10) > 0.6) events.push({ type: 'work', label: r(11) > 0.5 ? 'Hunter Industrials delivery run' : 'Ammos shift', time: '09:00', color: 'var(--gold)' });
+  if (r(12) > 0.85) events.push({ type: 'other', label: 'Raw milk pickup — Terra Madre', time: '11:00', color: 'var(--teal)' });
+
+  // nutrition flags
+  const hadLiver = r(13) > 0.65;
+  const hadRawMilk = r(14) > 0.3;
+  const hadOysters = r(15) > 0.85;
+
+  return {
+    vitality: Math.round(vitality * 10) / 10,
+    energy: Math.round(energy * 10) / 10,
+    mood: Math.round(mood * 10) / 10,
+    libido: Math.round(libido * 10) / 10,
+    sleep: sleepH,
+    weight: Math.round((83 + r(16) * 2 - 1) * 10) / 10,
+    srDay,
+    hasGym,
+    events,
+    hadLiver,
+    hadRawMilk,
+    hadOysters,
+    dots: [
+      hasGym ? 'var(--orange)' : null,
+      hasSocial && events.find(e => e.type === 'social') ? 'var(--pink)' : null,
+      hasWork && events.find(e => e.type === 'work') ? 'var(--gold)' : null,
+    ].filter(Boolean).slice(0, 3)
+  };
+}
+
+// Pre-generate data for a range of months
+const DATA = {}; // key: "YYYY-M-D"
+
+let srCounter = 0;
+const srResets = [
+  new Date(2025,10,15), new Date(2025,11,28),
+  new Date(2026,0,31),  new Date(2026,1,13)
+]; // dates of resets — current streak started Feb 13
+
+function getData(year, month, day) {
+  const key = `${year}-${month}-${day}`;
+  if (DATA[key] !== undefined) return DATA[key];
+  const d = new Date(year, month, day);
+
+  // compute SR day
+  let srd = 1;
+  for (let i = srResets.length - 1; i >= 0; i--) {
+    const diff = Math.floor((d - srResets[i]) / 86400000);
+    if (diff > 0) { srd = diff; break; }
+  }
+
+  const res = makeDayData(year, month, day, srd);
+  DATA[key] = res;
+  return res;
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentYear = 2026;
+let currentMonth = 1; // 0-indexed (Feb)
+let currentView = 'month';
+let selectedDay = null;
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+
+function render() {
+  const label = `${MONTHS[currentMonth]} ${currentYear}`;
+  document.getElementById('cal-month-label').textContent = label;
+  document.getElementById('page-title').textContent = 'Historical View';
+
+  if (currentView === 'month') renderMonth();
+  else if (currentView === 'week') renderWeek();
+  else renderYear();
+
+  renderSparklines();
+}
+
+function renderMonth() {
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon-start
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today = new Date(2026, 1, 27);
+
+  // empty cells
+  for (let i = 0; i < offset; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const data = getData(currentYear, currentMonth, d);
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    const isToday = currentYear === 2026 && currentMonth === 1 && d === 27;
+    if (isToday) el.classList.add('today');
+
+    if (!data) {
+      el.classList.add('no-data');
+      el.innerHTML = `<div class="day-num" style="color:var(--muted)">${d}</div>`;
+    } else {
+      const col = scoreToColor(data.vitality);
+      el.innerHTML = `
+        <div class="day-bg" style="background:${col}"></div>
+        <div class="day-num">${d}</div>
+        <div class="day-score-badge">${data.vitality}</div>
+        <div class="day-dots">${data.dots.map(c => `<div class="day-dot" style="background:${c}"></div>`).join('')}</div>
+      `;
+      el.onclick = () => selectDay(currentYear, currentMonth, d, el);
+    }
+
+    if (selectedDay && selectedDay.year === currentYear && selectedDay.month === currentMonth && selectedDay.day === d) {
+      el.classList.add('selected');
+    }
+
+    grid.appendChild(el);
+  }
+}
+
+function renderWeek() {
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+
+  // find start of the week containing selected day, or current week
+  const refDate = selectedDay
+    ? new Date(selectedDay.year, selectedDay.month, selectedDay.day)
+    : new Date(2026, 1, 27);
+
+  // get Monday of that week
+  const day = refDate.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(refDate);
+  monday.setDate(monday.getDate() + mondayOffset);
+
+  // render 4 weeks
+  for (let w = -1; w < 3; w++) {
+    const row = document.createElement('div');
+    row.className = 'week-row';
+
+    const weekStart = new Date(monday);
+    weekStart.setDate(weekStart.getDate() + w * 7);
+
+    const wLabel = document.createElement('div');
+    wLabel.className = 'week-label';
+    wLabel.textContent = `${SHORT_MONTHS[weekStart.getMonth()]} ${weekStart.getDate()}`;
+    row.appendChild(wLabel);
+
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(weekStart);
+      date.setDate(date.getDate() + d);
+      const y = date.getFullYear(), m = date.getMonth(), dd = date.getDate();
+      const data = getData(y, m, dd);
+
+      const cell = document.createElement('div');
+      cell.className = 'week-day-cell';
+
+      if (!data) {
+        cell.classList.add('no-data');
+      } else {
+        cell.style.background = scoreToColor(data.vitality);
+        cell.style.opacity = '0.85';
+        cell.innerHTML = `
+          <div style="position:absolute;top:4px;left:6px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:rgba(255,255,255,0.9);text-shadow:0 1px 3px rgba(0,0,0,0.7)">${dd}</div>
+          <div style="position:absolute;bottom:4px;right:5px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;color:rgba(255,255,255,0.85);text-shadow:0 1px 3px rgba(0,0,0,0.8)">${data.vitality}</div>
+          <div style="position:absolute;bottom:4px;left:5px;display:flex;gap:2px">${data.dots.map(c => `<div style="width:4px;height:4px;border-radius:50%;background:${c}"></div>`).join('')}</div>
+        `;
+        cell.onclick = () => { selectedDay = {year:y, month:m, day:dd}; selectDay(y,m,dd,cell); };
+      }
+
+      if (selectedDay && selectedDay.year===y && selectedDay.month===m && selectedDay.day===dd) {
+        cell.classList.add('selected');
+      }
+
+      row.appendChild(cell);
+    }
+
+    grid.appendChild(row);
+  }
+}
+
+function renderYear() {
+  const grid = document.getElementById('year-grid');
+  grid.innerHTML = '';
+
+  const year = currentYear;
+  for (let m = 0; m < 12; m++) {
+    const row = document.createElement('div');
+    row.className = 'year-month-row';
+
+    const label = document.createElement('div');
+    label.className = 'year-month-label';
+    label.textContent = SHORT_MONTHS[m];
+    row.appendChild(label);
+
+    const monthGrid = document.createElement('div');
+    monthGrid.className = 'year-month-grid';
+
+    const days = new Date(year, m + 1, 0).getDate();
+    for (let d = 1; d <= 31; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'year-day-cell';
+
+      if (d > days) {
+        cell.style.background = 'transparent';
+        cell.style.cursor = 'default';
+      } else {
+        const data = getData(year, m, d);
+        if (!data) {
+          cell.classList.add('no-data');
+        } else {
+          cell.style.background = scoreToColor(data.vitality);
+          cell.title = `${SHORT_MONTHS[m]} ${d}: Vitality ${data.vitality}`;
+          cell.onclick = () => {
+            currentMonth = m;
+            selectedDay = {year, month:m, day:d};
+            render();
+            selectDay(year,m,d,cell);
+          };
+        }
+      }
+
+      monthGrid.appendChild(cell);
+    }
+
+    row.appendChild(monthGrid);
+    grid.appendChild(row);
+  }
+}
+
+function renderSparklines() {
+  const rows = document.getElementById('sparkline-rows');
+  rows.innerHTML = '';
+
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  let totals = { energy:0, mood:0, libido:0, sleep:0, vitality:0, gym:0 };
+  let count = 0;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const data = getData(currentYear, currentMonth, d);
+    if (data) {
+      totals.energy += data.energy;
+      totals.mood += data.mood;
+      totals.libido += data.libido;
+      totals.sleep += data.sleep;
+      totals.vitality += data.vitality;
+      if (data.hasGym) totals.gym++;
+      count++;
+    }
+  }
+
+  if (count === 0) return;
+
+  const avgs = {
+    'Vitality':  { val: (totals.vitality/count).toFixed(1), max:10, color: scoreToColor(totals.vitality/count) },
+    'Energy':    { val: (totals.energy/count).toFixed(1),   max:10, color: 'var(--gold)' },
+    'Mood':      { val: (totals.mood/count).toFixed(1),     max:10, color: '#ff9f1c' },
+    'Libido':    { val: (totals.libido/count).toFixed(1),   max:10, color: 'var(--pink)' },
+    'Sleep avg': { val: (totals.sleep/count).toFixed(1)+'h',max:10, color: 'var(--blue)', rawVal: totals.sleep/count, maxRaw:10 },
+    'Gym days':  { val: totals.gym + 'x',                   max:daysInMonth, color:'var(--orange)', rawVal: totals.gym },
+  };
+
+  for (const [name, info] of Object.entries(avgs)) {
+    const rawVal = info.rawVal !== undefined ? info.rawVal : parseFloat(info.val);
+    const pct = Math.min(100, (rawVal / info.max) * 100);
+
+    const row = document.createElement('div');
+    row.className = 'sparkline-row';
+    row.innerHTML = `
+      <div class="sparkline-name" style="color:${info.color}">${name}</div>
+      <div class="sparkline-bar-track">
+        <div class="sparkline-bar-fill" style="width:${pct}%;background:${info.color}"></div>
+      </div>
+      <div class="sparkline-val" style="color:${info.color}">${info.val}</div>
+    `;
+    rows.appendChild(row);
+  }
+}
+
+// ── DAY DETAIL ────────────────────────────────────────────────────────────
+
+function selectDay(year, month, day, el) {
+  // deselect previous
+  document.querySelectorAll('.cal-day.selected, .week-day-cell.selected, .year-day-cell.selected').forEach(e => e.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+
+  selectedDay = {year, month, day};
+  const data = getData(year, month, day);
+  if (!data) return;
+
+  document.getElementById('detail-placeholder').style.display = 'none';
+  const content = document.getElementById('detail-content');
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+
+  const dateObj = new Date(year, month, day);
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  document.getElementById('d-date').textContent =
+    `${dayNames[dateObj.getDay()]} · ${day} ${SHORT_MONTHS[month]} ${year}`;
+
+  const scoreEl = document.getElementById('d-score');
+  scoreEl.textContent = data.vitality;
+  scoreEl.style.color = scoreToColor(data.vitality);
+
+  // Metrics
+  const metrics = [
+    { label: 'Energy',  val: `${data.energy}/10`,  color: 'var(--gold)' },
+    { label: 'Mood',    val: `${data.mood}/10`,    color: '#ff9f1c' },
+    { label: 'Libido',  val: `${data.libido}/10`,  color: 'var(--pink)' },
+    { label: 'Sleep',   val: `${data.sleep}h`,     color: 'var(--blue)' },
+    { label: 'Weight',  val: `${data.weight}kg`,   color: 'var(--purple)' },
+    { label: 'SR Day',  val: `Day ${data.srDay}`,  color: 'var(--accent)' },
+    { label: 'Gym',     val: data.hasGym ? 'Yes ✓' : 'Rest day', color: data.hasGym ? 'var(--orange)' : 'var(--muted)' },
+    { label: 'Liver',   val: data.hadLiver ? 'Logged ✓' : 'Not logged', color: data.hadLiver ? 'var(--teal)' : 'var(--red)' },
+    { label: 'Raw milk',val: data.hadRawMilk ? '~2L ✓' : 'Low', color: data.hadRawMilk ? 'var(--teal)' : 'var(--muted)' },
+    { label: 'Oysters', val: data.hadOysters ? 'Yes ✓' : '—', color: data.hadOysters ? 'var(--teal)' : 'var(--muted)' },
+  ];
+
+  document.getElementById('d-metrics').innerHTML = metrics.map(m => `
+    <div class="metric-row">
+      <span class="metric-label">${m.label}</span>
+      <span class="metric-value" style="color:${m.color}">${m.val}</span>
+    </div>
+  `).join('');
+
+  // Events
+  const eventsEl = document.getElementById('d-events');
+  if (data.events.length === 0) {
+    eventsEl.innerHTML = `<div style="font-size:11px;color:var(--muted);padding:8px 0">No calendar events logged</div>`;
+  } else {
+    eventsEl.innerHTML = data.events.map(e => `
+      <div class="event-item">
+        <div class="event-dot" style="background:${e.color}"></div>
+        <div>
+          <div>${e.label}</div>
+          <div class="event-time">${e.time}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // AI Analysis
+  const analysis = generateAnalysis(data, day, month, year);
+  document.getElementById('d-analysis').innerHTML = analysis;
+}
+
+function generateAnalysis(data, day, month, year) {
+  const positive = [];
+  const warnings = [];
+  const neutral = [];
+
+  if (data.srDay >= 10) positive.push(`SR day ${data.srDay}`);
+  if (data.hadLiver) positive.push('Liver consumed');
+  if (data.hadOysters) positive.push('Oysters consumed');
+  if (data.hadRawMilk) positive.push('Raw milk ~2L');
+  if (data.sleep >= 8) positive.push(`${data.sleep}h sleep`);
+  if (data.hasGym) positive.push('Gym session');
+  if (data.events.find(e => e.type === 'social')) positive.push('Social connection');
+
+  if (!data.hadLiver) warnings.push('No liver');
+  if (data.sleep < 6.5) warnings.push(`Low sleep (${data.sleep}h)`);
+  if (data.srDay < 5) warnings.push(`Low SR (day ${data.srDay})`);
+
+  let text = '';
+
+  if (data.vitality >= 8) {
+    text = `A high-performing day. `;
+    if (data.srDay >= 10) text += `SR streak at day ${data.srDay} is the primary driver here — your hormonal baseline is elevated. `;
+    if (data.hadLiver && data.hadRawMilk) text += `Nutrition was dialled in with liver and raw milk. `;
+    if (data.sleep >= 7.5) text += `Sleep over 7.5h supported recovery. `;
+    if (data.events.find(e => e.type === 'social')) text += `Social contact in the evening likely contributed to mood elevation. `;
+  } else if (data.vitality >= 6) {
+    text = `A solid but not peak day. `;
+    if (!data.hadLiver) text += `Liver wasn't logged — on your best days it nearly always is. `;
+    if (data.sleep < 7) text += `Sleep under 7h is likely weighing on energy scores. `;
+    if (data.srDay < 7) text += `SR streak still building (day ${data.srDay}) — expect improvements in the coming days. `;
+  } else {
+    text = `A lower-rated day. `;
+    if (data.sleep < 6.5) text += `Sleep was significantly below your baseline at ${data.sleep}h. `;
+    if (data.srDay < 4) text += `Early SR days tend to produce lower scores — this is expected. `;
+    if (!data.hadLiver && !data.hadRawMilk) text += `Nutrition was sparse; no liver or sufficient raw milk logged. `;
+  }
+
+  const chips = [
+    ...positive.map(p => `<span class="why-chip chip-positive">${p}</span>`),
+    ...warnings.map(w => `<span class="why-chip chip-warning">${w}</span>`),
+    ...neutral.map(n => `<span class="why-chip chip-neutral">${n}</span>`),
+  ].join('');
+
+  return `<div class="ai-label">APEX Analysis</div>${text}<br><br><div style="margin-top:4px">${chips}</div>`;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+
+function navPrev() {
+  if (currentView === 'year') { currentYear--; }
+  else { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } }
+  render();
+}
+
+function navNext() {
+  if (currentView === 'year') { currentYear++; }
+  else { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } }
+  render();
+}
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.getElementById('month-view').style.display = view === 'month' ? 'flex' : 'none';
+  document.getElementById('week-view').className = view === 'week' ? 'week-view visible' : 'week-view';
+  document.getElementById('year-view').className = view === 'year' ? 'year-view visible' : 'year-view';
+
+  const label = currentView === 'year' ? `${currentYear}` : `${MONTHS[currentMonth]} ${currentYear}`;
+  document.getElementById('cal-month-label').textContent = label;
+
+  document.getElementById('sparkline-section').style.display = view === 'year' ? 'none' : 'block';
+
+  render();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('month-view').style.display = 'flex';
+document.getElementById('week-view').className = 'week-view';
+document.getElementById('year-view').className = 'year-view';
+render();
+
+// Auto-select today
+setTimeout(() => {
+  const todayCells = document.querySelectorAll('.cal-day.today');
+  if (todayCells.length > 0) {
+    selectDay(2026, 1, 27, todayCells[0]);
+    todayCells[0].classList.add('selected');
+  }
+}, 100);
+</script>
+
+</body>
+</html>

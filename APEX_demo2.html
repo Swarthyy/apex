@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — Personal Intelligence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080810;
+    --surface: #0e0e1a;
+    --surface2: #141428;
+    --border: #1e1e35;
+    --accent: #c8f135;
+    --orange: #ff7a2f;
+    --pink: #ff3580;
+    --blue: #3574f1;
+    --purple: #9b5de5;
+    --teal: #00d4aa;
+    --red: #ff3535;
+    --gold: #ffcc00;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --muted2: #2a2a45;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    grid-template-rows: 58px 1fr;
+    height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,16,0.95);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .topbar-center { display: flex; gap: 6px; }
+
+  .tab-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 5px 14px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .date-chip { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+
+  .checkin-btn {
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    color: #000;
+    border: none;
+    padding: 7px 18px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .checkin-btn:hover { opacity: 0.85; }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  }
+
+  .nav-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 18px;
+    margin: 14px 0 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--text); background: rgba(255,255,255,0.04); }
+  .nav-item.active::after { content:''; position:absolute; right:0; top:0; bottom:0; width:2px; }
+
+  .nav-dot { width:7px; height:7px; border-radius:50%; background:var(--muted2); flex-shrink:0; transition: all 0.15s; }
+
+  /* sector colours */
+  [data-sector="sleep"] .nav-dot       { background: var(--blue); }
+  [data-sector="energy"] .nav-dot      { background: var(--gold); }
+  [data-sector="gym"] .nav-dot         { background: var(--orange); }
+  [data-sector="nutrition"] .nav-dot   { background: var(--teal); }
+  [data-sector="libido"] .nav-dot      { background: var(--pink); }
+  [data-sector="retention"] .nav-dot   { background: var(--accent); }
+  [data-sector="body"] .nav-dot        { background: var(--purple); }
+  [data-sector="mood"] .nav-dot        { background: #ff9f1c; }
+  [data-sector="finances"] .nav-dot    { background: var(--teal); }
+  [data-sector="business"] .nav-dot    { background: var(--blue); }
+
+  .active[data-sector="sleep"]::after       { background: var(--blue); }
+  .active[data-sector="energy"]::after      { background: var(--gold); }
+  .active[data-sector="gym"]::after         { background: var(--orange); }
+  .active[data-sector="nutrition"]::after   { background: var(--teal); }
+  .active[data-sector="libido"]::after      { background: var(--pink); }
+  .active[data-sector="retention"]::after   { background: var(--accent); }
+  .active[data-sector="body"]::after        { background: var(--purple); }
+  .active[data-sector="mood"]::after        { background: #ff9f1c; }
+  .active[data-sector="finances"]::after    { background: var(--teal); }
+  .active[data-sector="business"]::after    { background: var(--blue); }
+  .active[data-sector="dashboard"]::after,
+  .active[data-sector="insights"]::after,
+  .active[data-sector="chat"]::after,
+  .active[data-sector="integrations"]::after { background: var(--accent); }
+
+  /* MAIN */
+  .main { overflow-y: auto; position: relative; }
+
+  .view { display:none; padding:24px; flex-direction:column; gap:20px; animation: fadeUp 0.3s ease; }
+  .view.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* STAT TILES */
+  .stat-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+
+  .stat-card {
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1px solid transparent;
+  }
+  .stat-card:hover { transform: translateY(-3px); }
+
+  .stat-card.c-green  { background: linear-gradient(135deg,#0e1f05,#111811); border-color:#2a4a10; }
+  .stat-card.c-blue   { background: linear-gradient(135deg,#050e2a,#0a1020); border-color:#102060; }
+  .stat-card.c-gold   { background: linear-gradient(135deg,#1a1400,#151200); border-color:#3a3000; }
+  .stat-card.c-purple { background: linear-gradient(135deg,#120920,#0e0818); border-color:#2a1550; }
+  .stat-card.c-orange { background: linear-gradient(135deg,#1a0a00,#150800); border-color:#3a1800; }
+
+  .stat-card.c-green:hover  { box-shadow:0 6px 28px rgba(200,241,53,0.2);  border-color:rgba(200,241,53,0.4);  }
+  .stat-card.c-blue:hover   { box-shadow:0 6px 28px rgba(53,116,241,0.2);  border-color:rgba(53,116,241,0.4);  }
+  .stat-card.c-gold:hover   { box-shadow:0 6px 28px rgba(255,204,0,0.2);   border-color:rgba(255,204,0,0.4);   }
+  .stat-card.c-purple:hover { box-shadow:0 6px 28px rgba(155,93,229,0.2);  border-color:rgba(155,93,229,0.4);  }
+  .stat-card.c-orange:hover { box-shadow:0 6px 28px rgba(255,122,47,0.2);  border-color:rgba(255,122,47,0.4);  }
+
+  .stat-glow { position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; opacity:0.15; filter:blur(22px); }
+  .c-green  .stat-glow { background:var(--accent); }
+  .c-blue   .stat-glow { background:var(--blue); }
+  .c-gold   .stat-glow { background:var(--gold); }
+  .c-purple .stat-glow { background:var(--purple); }
+  .c-orange .stat-glow { background:var(--orange); }
+
+  .stat-label { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+  .c-green  .stat-label { color:var(--accent); }
+  .c-blue   .stat-label { color:var(--blue); }
+  .c-gold   .stat-label { color:var(--gold); }
+  .c-purple .stat-label { color:var(--purple); }
+  .c-orange .stat-label { color:var(--orange); }
+
+  .stat-value { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; line-height:1; color:var(--text); }
+  .stat-sub { font-size:10px; color:var(--muted); margin-top:8px; }
+
+  .stat-bar { position:absolute; bottom:0; left:0; height:2px; width:0; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .c-green  .stat-bar { background:linear-gradient(90deg,var(--accent),var(--teal)); }
+  .c-blue   .stat-bar { background:linear-gradient(90deg,var(--blue),var(--purple)); }
+  .c-gold   .stat-bar { background:linear-gradient(90deg,var(--gold),var(--orange)); }
+  .c-purple .stat-bar { background:linear-gradient(90deg,var(--purple),var(--pink)); }
+  .c-orange .stat-bar { background:linear-gradient(90deg,var(--orange),var(--red)); }
+
+  .click-hint { position:absolute; bottom:8px; right:10px; font-size:8px; color:var(--muted); opacity:0; transition:opacity 0.2s; text-transform:uppercase; letter-spacing:0.06em; }
+  .stat-card:hover .click-hint { opacity:1; }
+
+  /* INSIGHTS */
+  .insights-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .insight-card {
+    padding:16px 18px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    cursor:pointer;
+    transition:transform 0.15s;
+    border:1px solid var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .insight-card:hover { transform:translateY(-2px); }
+  .insight-card.positive { background:linear-gradient(135deg,#0a1a03,#0d1508); border-left:3px solid var(--accent); }
+  .insight-card.warning  { background:linear-gradient(135deg,#1a0e00,#150a00); border-left:3px solid var(--orange); }
+  .insight-card.info     { background:linear-gradient(135deg,#030a1a,#050810); border-left:3px solid var(--blue); }
+  .insight-card.alert    { background:linear-gradient(135deg,#1a0308,#150206); border-left:3px solid var(--pink); }
+
+  .insight-icon { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px; }
+  .positive .insight-icon { background:rgba(200,241,53,0.15); color:var(--accent); }
+  .warning  .insight-icon { background:rgba(255,122,47,0.15); color:var(--orange); }
+  .info     .insight-icon { background:rgba(53,116,241,0.15); color:var(--blue); }
+  .alert    .insight-icon { background:rgba(255,53,128,0.15); color:var(--pink); }
+
+  .insight-text { font-size:11px; line-height:1.65; color:var(--text); }
+  .insight-meta { font-size:9px; color:var(--muted); margin-top:6px; letter-spacing:0.04em; }
+
+  /* GRAPHS */
+  .graphs-row { display:grid; grid-template-columns:2fr 1fr; gap:10px; }
+
+  .graph-card { background:var(--surface); border:1px solid var(--border); padding:18px; }
+
+  .graph-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .graph-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; }
+  .graph-toggles { display:flex; gap:2px; }
+
+  .toggle { font-size:9px; padding:4px 9px; border:1px solid var(--border); background:none; color:var(--muted); cursor:pointer; font-family:'DM Mono',monospace; letter-spacing:0.06em; transition:all 0.15s; }
+  .toggle:hover { border-color:var(--accent); color:var(--accent); }
+  .toggle.active { background:var(--accent); color:#000; border-color:var(--accent); }
+
+  .graph-svg { width:100%; height:110px; }
+
+  /* SR CARD */
+  .sr-card {
+    background:linear-gradient(135deg,#0d1800,#091200);
+    border:1px solid rgba(200,241,53,0.2);
+    padding:20px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px;
+    position:relative; overflow:hidden;
+  }
+  .sr-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 0%,rgba(200,241,53,0.08),transparent 70%); }
+  .sr-number { font-family:'Syne',sans-serif; font-size:64px; font-weight:800; color:var(--accent); line-height:1; text-shadow:0 0 40px rgba(200,241,53,0.4); position:relative; }
+  .sr-label { font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .sr-status { font-size:10px; color:var(--accent); background:rgba(200,241,53,0.1); padding:4px 12px; border:1px solid rgba(200,241,53,0.2); letter-spacing:0.06em; position:relative; }
+
+  /* SECTOR FOCUS */
+  .sector-header { display:flex; align-items:center; gap:14px; }
+
+  .sector-back {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:10px; padding:5px 10px; cursor:pointer;
+    transition:all 0.15s; letter-spacing:0.06em; white-space:nowrap;
+  }
+  .sector-back:hover { border-color:var(--text); color:var(--text); }
+
+  .sector-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+  .sector-subtitle { font-size:10px; color:var(--muted); margin-top:3px; }
+
+  .sector-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+
+  .mini-stat { padding:14px; border:1px solid var(--border); background:var(--surface); }
+  .mini-stat-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .mini-stat-value { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+
+  .big-graph-card { background:var(--surface); border:1px solid var(--border); padding:20px; }
+
+  .history-list { display:flex; flex-direction:column; }
+  .history-row {
+    display:grid; grid-template-columns:80px 1fr 70px 60px;
+    gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:11px; align-items:center;
+  }
+  .history-row:last-child { border-bottom:none; }
+  .history-date { color:var(--muted); font-size:10px; }
+
+  .bar-visual { height:5px; background:var(--muted2); overflow:hidden; }
+  .bar-fill { height:100%; }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    border-left:1px solid var(--border);
+    padding:20px 18px;
+    display:flex; flex-direction:column; gap:18px;
+    overflow-y:auto;
+    background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%);
+  }
+
+  .notif-item { display:flex; flex-direction:column; gap:5px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .notif-item:last-child { border-bottom:none; }
+
+  .notif-tag { font-size:8px; letter-spacing:0.14em; text-transform:uppercase; padding:2px 7px; display:inline-block; width:fit-content; }
+  .t-green  { color:var(--accent);  background:rgba(200,241,53,0.08);  border:1px solid rgba(200,241,53,0.2);  }
+  .t-orange { color:var(--orange);  background:rgba(255,122,47,0.08);  border:1px solid rgba(255,122,47,0.2);  }
+  .t-blue   { color:var(--blue);    background:rgba(53,116,241,0.08);  border:1px solid rgba(53,116,241,0.2);  }
+  .t-pink   { color:var(--pink);    background:rgba(255,53,128,0.08);  border:1px solid rgba(255,53,128,0.2);  }
+  .t-gold   { color:var(--gold);    background:rgba(255,204,0,0.08);   border:1px solid rgba(255,204,0,0.2);   }
+
+  .notif-text { font-size:11px; line-height:1.55; color:var(--text); }
+  .notif-time { font-size:9px; color:var(--muted); }
+
+  .chat-preview { background:var(--surface2); border:1px solid var(--border); padding:12px; }
+  .chat-input-row { display:flex; gap:6px; margin-top:10px; }
+
+  .chat-input {
+    flex:1; background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-family:'DM Mono',monospace; font-size:11px; padding:8px 10px; outline:none; transition:border-color 0.15s;
+  }
+  .chat-input::placeholder { color:var(--muted); }
+  .chat-input:focus { border-color:var(--teal); }
+
+  .chat-send { background:linear-gradient(135deg,var(--accent),var(--teal)); border:none; color:#000; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; padding:8px 12px; cursor:pointer; }
+
+  .chat-msg { font-size:11px; line-height:1.6; padding:7px 0; border-bottom:1px solid var(--border); color:var(--muted); }
+  .chat-msg.user { color:var(--text); }
+
+  .integration-row { display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .integration-row:last-child { border-bottom:none; }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--muted2); border-radius:2px; }
+
+  /* ── MOBILE MODE BUTTON ── */
+  .mobile-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .mobile-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mobile-toggle-btn .btn-icon { font-size: 14px; line-height: 1; }
+
+  /* ── MOBILE OVERLAY ── */
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,4,10,0.88);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .mobile-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* Phone shell */
+  .phone-shell {
+    width: 390px;
+    height: 844px;
+    background: #0a0a14;
+    border-radius: 48px;
+    border: 2px solid #2a2a50;
+    box-shadow:
+      0 0 0 1px #111128,
+      0 0 80px rgba(200,241,53,0.08),
+      0 40px 100px rgba(0,0,0,0.8),
+      inset 0 0 0 1px rgba(255,255,255,0.03);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .mobile-overlay.open .phone-shell { transform: translateY(0); }
+
+  /* Dynamic island */
+  .phone-island {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .island-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a1a1a; }
+  .island-cam { width: 10px; height: 10px; border-radius: 50%; background: #111; border: 1px solid #222; }
+
+  /* Side buttons */
+  .phone-btn-vol {
+    position: absolute;
+    left: -3px;
+    top: 140px;
+    width: 4px;
+    height: 36px;
+    background: #1e1e35;
+    border-radius: 2px 0 0 2px;
+  }
+  .phone-btn-vol2 {
+    position: absolute;
+    left: -3px;
+    top: 190px;
+    width: 4px;
+    height: 36px;
+    background: #1e1e35;
+    border-radius: 2px 0 0 2px;
+  }
+  .phone-btn-power {
+    position: absolute;
+    right: -3px;
+    top: 170px;
+    width: 4px;
+    height: 52px;
+    background: #1e1e35;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* Screen content */
+  .phone-screen {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-top: 62px;
+    margin-bottom: 6px;
+  }
+
+  /* Mobile status bar */
+  .mobile-statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .msb-time { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+  .msb-icons { display: flex; gap: 5px; align-items: center; font-size: 11px; color: var(--text); }
+
+  /* Mobile header */
+  .mobile-header {
+    padding: 10px 20px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .mobile-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.18em; background: linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .mobile-header-right { display: flex; gap: 8px; align-items: center; }
+  .mobile-notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .mobile-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #000; font-family: 'Syne', sans-serif; font-weight: 800; }
+
+  /* Mobile scrollable body */
+  .mobile-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-body::-webkit-scrollbar { display: none; }
+
+  /* Mobile section title */
+  .m-section { font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+  /* Hero score card */
+  .m-hero {
+    background: linear-gradient(135deg, #0d1c04, #0a1508);
+    border: 1px solid rgba(200,241,53,0.2);
+    border-radius: 16px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:120px; height:120px; border-radius:50%; background:var(--accent); filter:blur(50px); opacity:0.12; }
+  .m-hero-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(200,241,53,0.6); margin-bottom: 6px; }
+  .m-hero-score { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1; text-shadow: 0 0 30px rgba(200,241,53,0.3); }
+  .m-hero-sub { font-size: 11px; color: rgba(200,241,53,0.5); margin-top: 4px; }
+  .m-hero-row { display: flex; gap: 10px; margin-top: 14px; }
+  .m-hero-chip { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(200,241,53,0.12); border-radius: 8px; padding: 8px; text-align: center; }
+  .m-hero-chip-val { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); }
+  .m-hero-chip-label { font-size: 8px; color: var(--muted); margin-top: 2px; letter-spacing: 0.06em; }
+
+  /* Mobile stat cards horizontal scroll */
+  .m-cards-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .m-cards-scroll::-webkit-scrollbar { display: none; }
+
+  .m-card {
+    min-width: 110px;
+    padding: 14px 12px;
+    border-radius: 12px;
+    border: 1px solid;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-card.c-green  { background: linear-gradient(135deg,#0e1f05,#111811); border-color:#2a4a10; }
+  .m-card.c-blue   { background: linear-gradient(135deg,#050e2a,#0a1020); border-color:#102060; }
+  .m-card.c-gold   { background: linear-gradient(135deg,#1a1400,#151200); border-color:#3a3000; }
+  .m-card.c-purple { background: linear-gradient(135deg,#120920,#0e0818); border-color:#2a1550; }
+  .m-card.c-orange { background: linear-gradient(135deg,#1a0a00,#150800); border-color:#3a1800; }
+
+  .m-card-label { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .c-green  .m-card-label { color:var(--accent); }
+  .c-blue   .m-card-label { color:var(--blue); }
+  .c-gold   .m-card-label { color:var(--gold); }
+  .c-purple .m-card-label { color:var(--purple); }
+  .c-orange .m-card-label { color:var(--orange); }
+
+  .m-card-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+  .m-card-sub { font-size: 9px; color: var(--muted); margin-top: 5px; }
+  .m-card-bar { position: absolute; bottom: 0; left: 0; height: 2px; }
+  .c-green  .m-card-bar { background: linear-gradient(90deg,var(--accent),var(--teal)); }
+  .c-blue   .m-card-bar { background: linear-gradient(90deg,var(--blue),var(--purple)); }
+  .c-gold   .m-card-bar { background: linear-gradient(90deg,var(--gold),var(--orange)); }
+  .c-purple .m-card-bar { background: linear-gradient(90deg,var(--purple),var(--pink)); }
+  .c-orange .m-card-bar { background: linear-gradient(90deg,var(--orange),var(--red)); }
+
+  /* Mobile insight cards */
+  .m-insight {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .m-insight.positive { background: linear-gradient(135deg,#0a1a03,#0d1508); border-left: 3px solid var(--accent); }
+  .m-insight.warning  { background: linear-gradient(135deg,#1a0e00,#150a00); border-left: 3px solid var(--orange); }
+  .m-insight.info     { background: linear-gradient(135deg,#030a1a,#050810); border-left: 3px solid var(--blue); }
+  .m-insight-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+  .positive .m-insight-icon { background: rgba(200,241,53,0.15); color: var(--accent); }
+  .warning  .m-insight-icon { background: rgba(255,122,47,0.15); color: var(--orange); }
+  .info     .m-insight-icon { background: rgba(53,116,241,0.15); color: var(--blue); }
+  .m-insight-text { font-size: 11px; line-height: 1.55; color: var(--text); flex: 1; }
+  .m-insight-meta { font-size: 9px; color: var(--muted); margin-top: 4px; }
+
+  /* Mobile mini graph */
+  .m-graph-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .m-graph-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+
+  /* Mobile check-in button */
+  .m-checkin {
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    width: 100%;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(200,241,53,0.2);
+  }
+
+  /* Mobile nav bar */
+  .mobile-navbar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 14px;
+    border-top: 1px solid var(--border);
+    background: rgba(8,8,16,0.98);
+    flex-shrink: 0;
+  }
+  .m-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 12px; }
+  .m-nav-icon { font-size: 18px; }
+  .m-nav-label { font-size: 8px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .m-nav-item.active .m-nav-label { color: var(--accent); }
+  .m-nav-item.active .m-nav-icon { filter: drop-shadow(0 0 4px var(--accent)); }
+
+  /* close overlay btn */
+  .overlay-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.08em;
+  }
+  .overlay-close:hover { border-color: var(--text); color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">APEX</div>
+    <div class="topbar-center">
+      <button class="tab-btn active" onclick="go('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="go('insights')">Insights</button>
+      <button class="tab-btn" onclick="go('chat')">Chat</button>
+    </div>
+    <div class="topbar-right">
+      <span class="date-chip">FRI 27 FEB 2026 · 09:14</span>
+      <button class="checkin-btn">Morning Check-in</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" data-sector="dashboard" onclick="go('dashboard')"><span class="nav-dot"></span>Dashboard</div>
+    <div class="nav-item" data-sector="insights" onclick="go('insights')"><span class="nav-dot"></span>Insights</div>
+    <div class="nav-item" data-sector="chat" onclick="go('chat')"><span class="nav-dot"></span>Chat</div>
+
+    <div class="nav-label">Sectors</div>
+    <div class="nav-item" data-sector="sleep" onclick="go('sleep')"><span class="nav-dot"></span>Sleep</div>
+    <div class="nav-item" data-sector="energy" onclick="go('energy')"><span class="nav-dot"></span>Energy</div>
+    <div class="nav-item" data-sector="gym" onclick="go('gym')"><span class="nav-dot"></span>Gym</div>
+    <div class="nav-item" data-sector="nutrition" onclick="go('nutrition')"><span class="nav-dot"></span>Nutrition</div>
+    <div class="nav-item" data-sector="libido" onclick="go('libido')"><span class="nav-dot"></span>Libido</div>
+    <div class="nav-item" data-sector="retention" onclick="go('retention')"><span class="nav-dot"></span>Retention</div>
+    <div class="nav-item" data-sector="body" onclick="go('body')"><span class="nav-dot"></span>Body Comp</div>
+    <div class="nav-item" data-sector="mood" onclick="go('mood')"><span class="nav-dot"></span>Mood</div>
+    <div class="nav-item" data-sector="finances" onclick="go('finances')"><span class="nav-dot"></span>Finances</div>
+    <div class="nav-item" data-sector="business" onclick="go('business')"><span class="nav-dot"></span>Business</div>
+
+    <div class="nav-label">Settings</div>
+    <div class="nav-item" data-sector="integrations" onclick="go('integrations')"><span class="nav-dot"></span>Integrations</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="v-dashboard">
+      <div>
+        <div class="section-title">Today at a glance</div>
+        <div class="stat-row">
+          <div class="stat-card c-green" onclick="go('retention')">
+            <div class="stat-glow"></div>
+            <div class="stat-label">SR Streak</div>
+            <div class="stat-value">14</div>
+            <div class="stat-sub">days — peak window</div>
+            <div class="stat-bar" data-w="80%"></div>
+            <div class="click-hint">View →</div>
+          </div>
+          <div class="stat-card c-blue" onclick="go('sleep')">
+            <div class="stat-glow"></div>
+            <div class="stat-label">Sleep</div>
+            <div class="stat-value" style="font-size:22px">7h 20m</div>
+            <div class="stat-sub">00:54 → 08:14</div>
+            <div class="stat-bar" data-w="65%"></div>
+            <div class="click-hint">View →</div>
+          </div>
+          <div class="stat-card c-gold" onclick="go('energy')">
+            <div class="stat-glow"></div>
+            <div class="stat-label">Energy on wake</div>
+            <div class="stat-value">8<span style="font-size:15px;opacity:0.5">/10</span></div>
+            <div class="stat-sub">+2 vs 7-day avg</div>
+            <div class="stat-bar" data-w="80%"></div>
+            <div class="click-hint">View →</div>
+          </div>
+          <div class="stat-card c-purple" onclick="go('body')">
+            <div class="stat-glow"></div>
+            <div class="stat-label">Weight</div>
+            <div class="stat-value" style="font-size:24px">83.4<span style="font-size:13px;opacity:0.5">kg</span></div>
+            <div class="stat-sub">↓ 0.3 vs yesterday</div>
+            <div class="stat-bar" data-w="55%"></div>
+            <div class="click-hint">View →</div>
+          </div>
+          <div class="stat-card c-orange" onclick="go('gym')">
+            <div class="stat-glow"></div>
+            <div class="stat-label">Gym · Hevy</div>
+            <div class="stat-value">3<span style="font-size:15px;opacity:0.5">x</span></div>
+            <div class="stat-sub">this week — on track</div>
+            <div class="stat-bar" data-w="60%"></div>
+            <div class="click-hint">View →</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Active insights</div>
+        <div class="insights-row">
+          <div class="insight-card positive" onclick="go('retention')">
+            <div class="insight-icon">↑</div>
+            <div>
+              <div class="insight-text">SR streak at day 14. Last two streaks this long showed energy averaging 8.4 — your peak window. Gym tomorrow could be exceptional.</div>
+              <div class="insight-meta">2h ago · Retention × Energy × Gym</div>
+            </div>
+          </div>
+          <div class="insight-card warning" onclick="go('nutrition')">
+            <div class="insight-icon">!</div>
+            <div>
+              <div class="insight-text">No liver logged in 7 days. Last month at 3x/week your libido and mood scores were significantly higher.</div>
+              <div class="insight-meta">Yesterday · Nutrition × Libido × Mood</div>
+            </div>
+          </div>
+          <div class="insight-card info" onclick="go('sleep')">
+            <div class="insight-icon">~</div>
+            <div>
+              <div class="insight-text">Sleep debt accumulating — 3 nights under 7.5h this week. Nothing in your calendar this weekend. Good window to recover.</div>
+              <div class="insight-meta">Today · Sleep × Calendar</div>
+            </div>
+          </div>
+          <div class="insight-card alert" onclick="go('body')">
+            <div class="insight-icon">↑</div>
+            <div>
+              <div class="insight-text">Body weight down 1.1kg over 14 days while gym volume is up. Lean mass likely increasing — recomp trend detected.</div>
+              <div class="insight-meta">3 days ago · Withings × Hevy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Trends</div>
+        <div class="graphs-row">
+          <div class="graph-card">
+            <div class="graph-header">
+              <div class="graph-title">Energy vs Libido</div>
+              <div class="graph-toggles">
+                <button class="toggle">7D</button>
+                <button class="toggle active">30D</button>
+                <button class="toggle">90D</button>
+              </div>
+            </div>
+            <svg class="graph-svg" viewBox="0 0 600 110" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#c8f135" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#c8f135" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ff3580" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#ff3580" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="27" x2="600" y2="27" stroke="#1e1e35" stroke-width="1"/>
+              <line x1="0" y1="55" x2="600" y2="55" stroke="#1e1e35" stroke-width="1"/>
+              <line x1="0" y1="82" x2="600" y2="82" stroke="#1e1e35" stroke-width="1"/>
+              <path d="M0,88 L60,75 L120,65 L180,70 L240,52 L300,42 L360,48 L420,30 L480,22 L540,18 L600,12 L600,110 L0,110Z" fill="url(#g1)"/>
+              <polyline points="0,88 60,75 120,65 180,70 240,52 300,42 360,48 420,30 480,22 540,18 600,12" fill="none" stroke="#c8f135" stroke-width="2"/>
+              <path d="M0,85 L60,80 L120,78 L180,75 L240,62 L300,58 L360,65 L420,50 L480,44 L540,40 L600,35 L600,110 L0,110Z" fill="url(#g2)"/>
+              <polyline points="0,85 60,80 120,78 180,75 240,62 300,58 360,65 420,50 480,44 540,40 600,35" fill="none" stroke="#ff3580" stroke-width="2" stroke-dasharray="5,3"/>
+              <line x1="300" y1="0" x2="300" y2="110" stroke="#c8f135" stroke-width="0.5" stroke-dasharray="2,4" opacity="0.35"/>
+              <text x="304" y="10" fill="#5a5a7a" font-size="8" font-family="DM Mono,monospace">SR day 7</text>
+              <circle cx="300" cy="42" r="3.5" fill="#c8f135"/>
+              <circle cx="300" cy="58" r="3.5" fill="#ff3580"/>
+            </svg>
+            <div style="display:flex;gap:18px;margin-top:10px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:var(--muted)"><div style="width:14px;height:2px;background:var(--accent)"></div>Energy</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:var(--muted)"><div style="width:14px;height:0;border-top:2px dashed var(--pink)"></div>Libido</div>
+            </div>
+          </div>
+          <div class="sr-card">
+            <div class="sr-label">Semen Retention</div>
+            <div class="sr-number">14</div>
+            <div class="sr-label">days active</div>
+            <div class="sr-status">Peak performance window</div>
+            <div style="margin-top:14px;width:100%;position:relative;z-index:1">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:8px"><span>Personal best</span><span style="color:var(--text)">31 days</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span>Streak started</span><span style="color:var(--text)">13 Feb</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLEEP -->
+    <div class="view" id="v-sleep">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div>
+          <div class="sector-title" style="color:var(--blue)">Sleep</div>
+          <div class="sector-subtitle">Synced via Apple Health · Last updated 08:14 today</div>
+        </div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Last Night</div><div class="mini-stat-value" style="color:var(--blue)">7h 20m</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">7-Day Avg</div><div class="mini-stat-value">6h 55m</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Bedtime</div><div class="mini-stat-value" style="font-size:18px">00:54</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Wake Time</div><div class="mini-stat-value" style="font-size:18px">08:14</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header">
+          <div class="graph-title">Sleep Duration — 14 Days</div>
+          <div class="graph-toggles"><button class="toggle active">14D</button><button class="toggle">30D</button><button class="toggle">90D</button></div>
+        </div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="slG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3574f1" stop-opacity="0.3"/><stop offset="100%" stop-color="#3574f1" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="30" x2="700" y2="30" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="50" x2="700" y2="50" stroke="#3574f1" stroke-width="0.5" opacity="0.3" stroke-dasharray="4,4"/>
+          <path d="M0,80 L50,55 L100,70 L150,85 L200,50 L250,60 L300,75 L350,40 L400,55 L450,65 L500,45 L550,35 L600,50 L650,45 L700,40 L700,130 L0,130Z" fill="url(#slG)"/>
+          <polyline points="0,80 50,55 100,70 150,85 200,50 250,60 300,75 350,40 400,55 450,65 500,45 550,35 600,50 650,45 700,40" fill="none" stroke="#3574f1" stroke-width="2"/>
+          <text x="2" y="12" fill="#5a5a7a" font-size="9" font-family="DM Mono,monospace">9h</text>
+          <text x="2" y="47" fill="#5a5a7a" font-size="9" font-family="DM Mono,monospace">7.5h</text>
+          <text x="2" y="82" fill="#5a5a7a" font-size="9" font-family="DM Mono,monospace">6h</text>
+        </svg>
+      </div>
+      <div class="big-graph-card">
+        <div class="section-title" style="margin-bottom:10px">Recent Log</div>
+        <div class="history-list">
+          <div class="history-row" style="color:var(--muted);font-size:9px;letter-spacing:0.08em;text-transform:uppercase"><span>Date</span><span>Duration</span><span>Score</span><span>Δ</span></div>
+          <div class="history-row"><span class="history-date">Today</span><div><div class="bar-visual"><div class="bar-fill" style="width:73%;background:var(--blue)"></div></div></div><span style="color:var(--blue)">7h 20m</span><span style="color:var(--accent)">↑</span></div>
+          <div class="history-row"><span class="history-date">Thu</span><div><div class="bar-visual"><div class="bar-fill" style="width:60%;background:var(--blue)"></div></div></div><span style="color:var(--muted)">6h 10m</span><span style="color:var(--red)">↓</span></div>
+          <div class="history-row"><span class="history-date">Wed</span><div><div class="bar-visual"><div class="bar-fill" style="width:65%;background:var(--blue)"></div></div></div><span style="color:var(--muted)">6h 40m</span><span style="color:var(--muted)">–</span></div>
+          <div class="history-row"><span class="history-date">Tue</span><div><div class="bar-visual"><div class="bar-fill" style="width:80%;background:var(--blue)"></div></div></div><span style="color:var(--blue)">8h 10m</span><span style="color:var(--accent)">↑</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENERGY -->
+    <div class="view" id="v-energy">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--gold)">Energy</div><div class="sector-subtitle">Daily check-in · Morning score</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Today</div><div class="mini-stat-value" style="color:var(--gold)">8/10</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">7-Day Avg</div><div class="mini-stat-value">6.2</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">30-Day Avg</div><div class="mini-stat-value">6.8</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Peak Correlation</div><div class="mini-stat-value" style="font-size:14px">SR day 14+</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">Energy Score — 30 Days</div><div class="graph-toggles"><button class="toggle">7D</button><button class="toggle active">30D</button><button class="toggle">90D</button></div></div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="enG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcc00" stop-opacity="0.3"/><stop offset="100%" stop-color="#ffcc00" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="26" x2="700" y2="26" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="104" x2="700" y2="104" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,90 L50,80 L100,70 L150,85 L200,60 L250,55 L300,65 L350,45 L400,40 L450,50 L500,35 L550,30 L600,38 L650,25 L700,20 L700,130 L0,130Z" fill="url(#enG)"/>
+          <polyline points="0,90 50,80 100,70 150,85 200,60 250,55 300,65 350,45 400,40 450,50 500,35 550,30 600,38 650,25 700,20" fill="none" stroke="#ffcc00" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- GYM -->
+    <div class="view" id="v-gym">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--orange)">Gym</div><div class="sector-subtitle">Synced via Hevy · Last session Thu 26 Feb</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">This Week</div><div class="mini-stat-value" style="color:var(--orange)">3 sessions</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Volume (Thu)</div><div class="mini-stat-value" style="font-size:18px">18,400kg</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">7-Day Avg</div><div class="mini-stat-value" style="font-size:18px">16,200kg</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Streak</div><div class="mini-stat-value">8 wks</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">Weekly Volume Trend</div></div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="gyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff7a2f" stop-opacity="0.3"/><stop offset="100%" stop-color="#ff7a2f" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="30" x2="700" y2="30" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,100 L100,90 L200,80 L300,70 L400,60 L500,45 L600,38 L700,30 L700,130 L0,130Z" fill="url(#gyG)"/>
+          <polyline points="0,100 100,90 200,80 300,70 400,60 500,45 600,38 700,30" fill="none" stroke="#ff7a2f" stroke-width="2"/>
+          <circle cx="700" cy="30" r="4" fill="#ff7a2f"/>
+        </svg>
+      </div>
+      <div class="big-graph-card">
+        <div class="section-title" style="margin-bottom:10px">Recent Sessions</div>
+        <div class="history-list">
+          <div class="history-row" style="color:var(--muted);font-size:9px;letter-spacing:0.08em;text-transform:uppercase"><span>Date</span><span>Session</span><span>Volume</span><span>PRs</span></div>
+          <div class="history-row"><span class="history-date">Thu 26</span><div style="font-size:11px">Push A</div><span style="color:var(--orange)">18,400kg</span><span style="color:var(--gold)">2 PRs</span></div>
+          <div class="history-row"><span class="history-date">Tue 24</span><div style="font-size:11px">Pull</div><span style="color:var(--muted)">15,800kg</span><span style="color:var(--muted)">—</span></div>
+          <div class="history-row"><span class="history-date">Mon 23</span><div style="font-size:11px">Legs</div><span style="color:var(--muted)">16,200kg</span><span style="color:var(--gold)">1 PR</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUTRITION -->
+    <div class="view" id="v-nutrition">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--teal)">Nutrition</div><div class="sector-subtitle">Photo logging · AI calorie estimation</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Today (est.)</div><div class="mini-stat-value" style="color:var(--teal)">2,400 kcal</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Protein</div><div class="mini-stat-value">190g</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Raw Milk</div><div class="mini-stat-value">1.5L</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Liver (week)</div><div class="mini-stat-value" style="color:var(--red)">0×</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="section-title" style="margin-bottom:10px">Today's Log</div>
+        <div class="history-list">
+          <div class="history-row" style="color:var(--muted);font-size:9px;letter-spacing:0.08em;text-transform:uppercase"><span>Time</span><span>Meal</span><span>Est. kcal</span><span></span></div>
+          <div class="history-row"><span class="history-date">07:30</span><div style="font-size:11px">Raw milk 500ml + 3 eggs</div><span style="color:var(--teal)">~480</span><span></span></div>
+          <div class="history-row"><span class="history-date">12:00</span><div style="font-size:11px">Grass-fed beef + rice</div><span style="color:var(--teal)">~720</span><span></span></div>
+          <div class="history-row"><span class="history-date">—</span><div style="font-size:11px;color:var(--muted)">+ Log meal</div><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBIDO -->
+    <div class="view" id="v-libido">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--pink)">Libido</div><div class="sector-subtitle">Daily check-in · 1–10 scale</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Today</div><div class="mini-stat-value" style="color:var(--pink)">7/10</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">7-Day Avg</div><div class="mini-stat-value">6.4</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">30-Day Avg</div><div class="mini-stat-value">6.1</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Peak Correlation</div><div class="mini-stat-value" style="font-size:14px">SR + Liver</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">Libido Score — 30 Days</div></div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="lbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff3580" stop-opacity="0.25"/><stop offset="100%" stop-color="#ff3580" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="30" x2="700" y2="30" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,85 L60,80 L120,70 L180,75 L240,60 L300,55 L360,65 L420,50 L480,42 L540,45 L600,35 L700,30 L700,130 L0,130Z" fill="url(#lbG)"/>
+          <polyline points="0,85 60,80 120,70 180,75 240,60 300,55 360,65 420,50 480,42 540,45 600,35 700,30" fill="none" stroke="#ff3580" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RETENTION -->
+    <div class="view" id="v-retention">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--accent)">Retention</div><div class="sector-subtitle">Manual tracking · Correlates with energy, libido, gym performance</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="sr-card" style="padding:30px">
+          <div class="sr-label">Current Streak</div>
+          <div class="sr-number" style="font-size:80px">14</div>
+          <div class="sr-label">days</div>
+          <div class="sr-status">Peak performance window</div>
+        </div>
+        <div class="big-graph-card" style="display:flex;flex-direction:column;gap:14px">
+          <div class="section-title">Streak History</div>
+          <div class="history-list">
+            <div class="history-row" style="color:var(--muted);font-size:9px;letter-spacing:0.08em;text-transform:uppercase"><span>Period</span><span>Length</span><span>Avg Energy</span><span></span></div>
+            <div class="history-row"><span class="history-date">Current</span><div class="bar-visual"><div class="bar-fill" style="width:45%;background:var(--accent)"></div></div><span style="color:var(--accent)">8.2</span><span style="color:var(--accent)">Active</span></div>
+            <div class="history-row"><span class="history-date">Jan streak</span><div class="bar-visual"><div class="bar-fill" style="width:100%;background:var(--accent)"></div></div><span style="color:var(--accent)">8.4</span><span style="color:var(--muted)">31 days</span></div>
+            <div class="history-row"><span class="history-date">Dec streak</span><div class="bar-visual"><div class="bar-fill" style="width:55%;background:var(--muted2)"></div></div><span style="color:var(--muted)">6.8</span><span style="color:var(--muted)">17 days</span></div>
+            <div class="history-row"><span class="history-date">Nov streak</span><div class="bar-visual"><div class="bar-fill" style="width:26%;background:var(--muted2)"></div></div><span style="color:var(--muted)">6.1</span><span style="color:var(--muted)">8 days</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">SR Streak vs Energy Score (90 Days)</div></div>
+        <svg width="100%" height="110" viewBox="0 0 700 110" preserveAspectRatio="none">
+          <defs><linearGradient id="srG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c8f135" stop-opacity="0.2"/><stop offset="100%" stop-color="#c8f135" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="27" x2="700" y2="27" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="55" x2="700" y2="55" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="82" x2="700" y2="82" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,90 L100,65 L200,45 L300,30 L350,95 L400,80 L480,55 L550,40 L700,25 L700,110 L0,110Z" fill="url(#srG)"/>
+          <polyline points="0,90 100,65 200,45 300,30 350,95 400,80 480,55 550,40 700,25" fill="none" stroke="#c8f135" stroke-width="2"/>
+          <line x1="350" y1="0" x2="350" y2="110" stroke="#ff3535" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+          <text x="354" y="10" fill="#ff3535" font-size="8" font-family="DM Mono,monospace">Reset</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="view" id="v-body">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--purple)">Body Comp</div><div class="sector-subtitle">Synced via Withings · Last weigh-in this morning</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Weight</div><div class="mini-stat-value" style="color:var(--purple)">83.4kg</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Body Fat</div><div class="mini-stat-value">13.2%</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">14-Day Δ</div><div class="mini-stat-value" style="color:var(--accent)">↓1.1kg</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Trend</div><div class="mini-stat-value" style="font-size:14px">Recomp</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">Weight — 30 Days</div></div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="bdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9b5de5" stop-opacity="0.25"/><stop offset="100%" stop-color="#9b5de5" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="30" x2="700" y2="30" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,60 L100,65 L200,62 L300,58 L400,52 L500,48 L600,44 L700,40 L700,130 L0,130Z" fill="url(#bdG)"/>
+          <polyline points="0,60 100,65 200,62 300,58 400,52 500,48 600,44 700,40" fill="none" stroke="#9b5de5" stroke-width="2"/>
+          <circle cx="700" cy="40" r="4" fill="#9b5de5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- MOOD -->
+    <div class="view" id="v-mood">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:#ff9f1c">Mood</div><div class="sector-subtitle">Daily check-in</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Today</div><div class="mini-stat-value" style="color:#ff9f1c">8/10</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">7-Day Avg</div><div class="mini-stat-value">6.8</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">30-Day Avg</div><div class="mini-stat-value">7.0</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Best Correlation</div><div class="mini-stat-value" style="font-size:14px">Sun + Liver</div></div>
+      </div>
+      <div class="big-graph-card">
+        <div class="graph-header"><div class="graph-title">Mood Score — 30 Days</div></div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="moG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9f1c" stop-opacity="0.25"/><stop offset="100%" stop-color="#ff9f1c" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="30" x2="700" y2="30" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="65" x2="700" y2="65" stroke="#1e1e35" stroke-width="1"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#1e1e35" stroke-width="1"/>
+          <path d="M0,70 L100,60 L200,75 L300,55 L400,50 L500,62 L600,45 L700,38 L700,130 L0,130Z" fill="url(#moG)"/>
+          <polyline points="0,70 100,60 200,75 300,55 400,50 500,62 600,45 700,38" fill="none" stroke="#ff9f1c" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- FINANCES -->
+    <div class="view" id="v-finances">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--teal)">Finances</div><div class="sector-subtitle">Manual tracking</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">This Month Net</div><div class="mini-stat-value" style="color:var(--teal)">+$840</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Expenses</div><div class="mini-stat-value">$1,240</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Income</div><div class="mini-stat-value">$2,080</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Savings Rate</div><div class="mini-stat-value">40%</div></div>
+      </div>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="view" id="v-business">
+      <div class="sector-header">
+        <button class="sector-back" onclick="go('dashboard')">← Back</button>
+        <div><div class="sector-title" style="color:var(--blue)">Business</div><div class="sector-subtitle">Check-in + Calendar sync</div></div>
+      </div>
+      <div class="sector-stats-row">
+        <div class="mini-stat"><div class="mini-stat-label">Focus Score</div><div class="mini-stat-value" style="color:var(--blue)">7/10</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Active Projects</div><div class="mini-stat-value">3</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Momentum</div><div class="mini-stat-value" style="color:var(--accent)">↑</div></div>
+        <div class="mini-stat"><div class="mini-stat-label">Next Event</div><div class="mini-stat-value" style="font-size:14px">Mon 10am</div></div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="view" id="v-insights">
+      <div class="section-title">All Insights</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="insight-card positive" style="cursor:default"><div class="insight-icon">↑</div><div><div class="insight-text">SR streak at day 14. Last two streaks this long showed energy averaging 8.4 — your peak window. Gym tomorrow could be exceptional.</div><div class="insight-meta">2h ago · Retention × Energy × Gym · Confidence: High</div></div></div>
+        <div class="insight-card warning" style="cursor:default"><div class="insight-icon">!</div><div><div class="insight-text">No liver logged in 7 days. Last month at 3x/week your libido and mood scores were both significantly higher (+1.8 and +1.2 respectively).</div><div class="insight-meta">Yesterday · Nutrition × Libido × Mood · Confidence: High</div></div></div>
+        <div class="insight-card info" style="cursor:default"><div class="insight-icon">~</div><div><div class="insight-text">Sleep debt accumulating — 3 nights under 7.5h this week. Calendar is clear this weekend. Suggested target: 8.5h both nights.</div><div class="insight-meta">Today · Sleep × Calendar · Confidence: Medium</div></div></div>
+        <div class="insight-card alert" style="cursor:default"><div class="insight-icon">↑</div><div><div class="insight-text">Body weight down 1.1kg over 14 days while gym volume is up. Lean mass likely increasing — recomp pattern confirmed.</div><div class="insight-meta">3 days ago · Withings × Hevy · Confidence: Medium</div></div></div>
+        <div class="insight-card info" style="cursor:default"><div class="insight-icon">~</div><div><div class="insight-text">Your best mood scores (avg 8.4) consistently follow days with direct sunlight exposure logged before 9am. This week: 1 occurrence.</div><div class="insight-meta">5 days ago · Mood × Environment · Confidence: Medium</div></div></div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="view" id="v-chat">
+      <div class="section-title">Ask APEX</div>
+      <div style="flex:1;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);padding:20px;min-height:420px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;margin-bottom:14px" id="chat-log">
+          <div style="background:var(--surface2);padding:12px 16px;border-left:3px solid var(--muted);font-size:12px;line-height:1.65;color:var(--muted)">What was I eating when I felt best last month?</div>
+          <div style="background:rgba(0,212,170,0.04);padding:12px 16px;border-left:3px solid var(--teal);font-size:12px;line-height:1.65">Jan 14–21, you logged raw liver 4×, oysters 2×, raw milk ~2L/day. Energy averaged 8.6, mood 8.1 — your highest recorded week. You were also on day 8–15 of your January SR streak, which likely compounded the effect.</div>
+          <div style="background:var(--surface2);padding:12px 16px;border-left:3px solid var(--muted);font-size:12px;line-height:1.65;color:var(--muted)">Why has my libido been lower this week?</div>
+          <div style="background:rgba(0,212,170,0.04);padding:12px 16px;border-left:3px solid var(--teal);font-size:12px;line-height:1.65">Three likely factors: (1) No liver logged in 7 days. (2) Sleep sub-7h three nights — correlates with −1.4 libido score average. (3) SR streak days 10–13 historically show a dip before climbing from day 14+. You're entering the upswing now.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="main-chat-input" class="chat-input" type="text" placeholder="Ask anything about yourself..." onkeydown="if(event.key==='Enter')sendChat()"/>
+          <button class="chat-send" onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="view" id="v-integrations">
+      <div class="section-title">Integrations</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);padding:18px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">Hevy</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Gym tracking · Last sync 2h ago</div></div>
+          <span class="notif-tag t-green" style="font-size:10px">● Live</span>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);padding:18px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">Withings</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Body comp & weight · Last sync today</div></div>
+          <span class="notif-tag t-green" style="font-size:10px">● Live</span>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);padding:18px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">Apple Health</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Sleep & HRV · Last sync today</div></div>
+          <span class="notif-tag t-green" style="font-size:10px">● Live</span>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);padding:18px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">Google Calendar</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Schedule context for smart notifications</div></div>
+          <span class="notif-tag t-orange" style="font-size:10px">● Connected</span>
+        </div>
+        <div style="background:var(--surface);border:1px dashed var(--border);padding:18px;display:flex;justify-content:center;cursor:pointer;color:var(--muted);font-size:12px;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          + Add Integration
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div>
+      <div class="section-title">Notifications</div>
+      <div class="notif-item"><span class="notif-tag t-green">Retention × Energy</span><div class="notif-text">SR streak at day 14 — peak energy window. Protect it this weekend.</div><span class="notif-time">08:30 today</span></div>
+      <div class="notif-item"><span class="notif-tag t-orange">Nutrition</span><div class="notif-text">No liver logged in 7 days. Correlates strongly with your mood and libido scores.</div><span class="notif-time">Yesterday 12:00</span></div>
+      <div class="notif-item"><span class="notif-tag t-blue">Sleep × Calendar</span><div class="notif-text">Nothing in your calendar this weekend — good window to clear sleep debt.</div><span class="notif-time">Yesterday 09:00</span></div>
+      <div class="notif-item"><span class="notif-tag t-gold">Gym</span><div class="notif-text">2 PRs hit Thursday. On track for best volume week in 6 weeks.</div><span class="notif-time">Thu 18:40</span></div>
+    </div>
+
+    <div>
+      <div class="section-title">Quick Ask</div>
+      <div class="chat-preview">
+        <div class="chat-msg">Why has my energy been low this week?</div>
+        <div class="chat-msg user">Sleep averaged 6h 30m (vs 7h 40m baseline). SR streak in dip window (days 10–13). Both typically resolve by day 15.</div>
+        <div class="chat-input-row">
+          <input class="chat-input" type="text" placeholder="Ask anything..."/>
+          <button class="chat-send">→</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Integrations</div>
+      <div class="integration-row"><span>Hevy</span><span style="color:var(--accent);font-size:10px">● Live</span></div>
+      <div class="integration-row"><span>Withings</span><span style="color:var(--accent);font-size:10px">● Live</span></div>
+      <div class="integration-row"><span>Apple Health</span><span style="color:var(--accent);font-size:10px">● Live</span></div>
+      <div class="integration-row"><span>Google Calendar</span><span style="color:var(--orange);font-size:10px">● Connected</span></div>
+      <div class="integration-row" style="cursor:pointer;color:var(--muted)"><span>+ Add integration</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MOBILE TOGGLE BUTTON -->
+<button class="mobile-toggle-btn" onclick="openMobile()">
+  <span class="btn-icon">📱</span> Mobile View
+</button>
+
+<!-- MOBILE OVERLAY -->
+<div class="mobile-overlay" id="mobile-overlay">
+  <button class="overlay-close" onclick="closeMobile()">✕ Close</button>
+
+  <div class="phone-shell">
+    <!-- physical buttons -->
+    <div class="phone-btn-vol"></div>
+    <div class="phone-btn-vol2"></div>
+    <div class="phone-btn-power"></div>
+
+    <!-- dynamic island -->
+    <div class="phone-island">
+      <div class="island-dot"></div>
+      <div class="island-cam"></div>
+    </div>
+
+    <!-- screen -->
+    <div class="phone-screen">
+      <!-- status bar -->
+      <div class="mobile-statusbar">
+        <div class="msb-time">9:14</div>
+        <div class="msb-icons">
+          <span>●●●●</span>
+          <span>WiFi</span>
+          <span>🔋</span>
+        </div>
+      </div>
+
+      <!-- app header -->
+      <div class="mobile-header">
+        <div class="mobile-logo">APEX</div>
+        <div class="mobile-header-right">
+          <div class="mobile-notif-dot"></div>
+          <div class="mobile-avatar">J</div>
+        </div>
+      </div>
+
+      <!-- scrollable body -->
+      <div class="mobile-body">
+
+        <!-- Hero SR card -->
+        <div class="m-hero">
+          <div class="m-hero-label">SR Streak · Day 14</div>
+          <div class="m-hero-score">14</div>
+          <div class="m-hero-sub">Peak performance window ↑</div>
+          <div class="m-hero-row">
+            <div class="m-hero-chip">
+              <div class="m-hero-chip-val">8/10</div>
+              <div class="m-hero-chip-label">Energy</div>
+            </div>
+            <div class="m-hero-chip">
+              <div class="m-hero-chip-val">7h 20m</div>
+              <div class="m-hero-chip-label">Sleep</div>
+            </div>
+            <div class="m-hero-chip">
+              <div class="m-hero-chip-val">8/10</div>
+              <div class="m-hero-chip-label">Mood</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Horizontal stat scroll -->
+        <div>
+          <div class="m-section">Today's Sectors</div>
+          <div class="m-cards-scroll">
+            <div class="m-card c-blue">
+              <div class="m-card-label">Sleep</div>
+              <div class="m-card-val">7h 20m</div>
+              <div class="m-card-sub">00:54 → 08:14</div>
+              <div class="m-card-bar" style="width:73%"></div>
+            </div>
+            <div class="m-card c-gold">
+              <div class="m-card-label">Energy</div>
+              <div class="m-card-val">8/10</div>
+              <div class="m-card-sub">+2 vs avg</div>
+              <div class="m-card-bar" style="width:80%"></div>
+            </div>
+            <div class="m-card c-purple">
+              <div class="m-card-label">Weight</div>
+              <div class="m-card-val">83.4kg</div>
+              <div class="m-card-sub">↓ 0.3 kg</div>
+              <div class="m-card-bar" style="width:55%"></div>
+            </div>
+            <div class="m-card c-orange">
+              <div class="m-card-label">Gym</div>
+              <div class="m-card-val">3×</div>
+              <div class="m-card-sub">this week</div>
+              <div class="m-card-bar" style="width:60%"></div>
+            </div>
+            <div class="m-card c-green">
+              <div class="m-card-label">Libido</div>
+              <div class="m-card-val">7/10</div>
+              <div class="m-card-sub">trending up</div>
+              <div class="m-card-bar" style="width:70%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Morning check-in -->
+        <button class="m-checkin">☀ Morning Check-in Due</button>
+
+        <!-- Insights -->
+        <div>
+          <div class="m-section">Active Insights</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="m-insight positive">
+              <div class="m-insight-icon">↑</div>
+              <div>
+                <div class="m-insight-text">SR day 14 — peak window. Last two streaks at this point averaged energy 8.4. Gym tomorrow could be exceptional.</div>
+                <div class="m-insight-meta">2h ago · Retention × Energy</div>
+              </div>
+            </div>
+            <div class="m-insight warning">
+              <div class="m-insight-icon">!</div>
+              <div>
+                <div class="m-insight-text">No liver logged in 7 days. Correlates with lower libido and mood last time.</div>
+                <div class="m-insight-meta">Yesterday · Nutrition × Libido</div>
+              </div>
+            </div>
+            <div class="m-insight info">
+              <div class="m-insight-icon">~</div>
+              <div>
+                <div class="m-insight-text">Sleep debt building. Free weekend — good window to clear it.</div>
+                <div class="m-insight-meta">Today · Sleep × Calendar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini trend graph -->
+        <div class="m-graph-card">
+          <div class="m-graph-title">Energy — 14 Days</div>
+          <svg width="100%" height="80" viewBox="0 0 340 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="mG1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c8f135" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#c8f135" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="20" x2="340" y2="20" stroke="#1e1e35" stroke-width="1"/>
+            <line x1="0" y1="50" x2="340" y2="50" stroke="#1e1e35" stroke-width="1"/>
+            <path d="M0,60 L25,52 L50,55 L75,48 L100,40 L125,44 L150,38 L175,30 L200,35 L225,28 L250,22 L275,18 L300,16 L325,12 L340,10 L340,80 L0,80Z" fill="url(#mG1)"/>
+            <polyline points="0,60 25,52 50,55 75,48 100,40 125,44 150,38 175,30 200,35 225,28 250,22 275,18 300,16 325,12 340,10" fill="none" stroke="#c8f135" stroke-width="2"/>
+            <circle cx="340" cy="10" r="3.5" fill="#c8f135"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">
+            <span>14 Feb</span><span>Today</span>
+          </div>
+        </div>
+
+        <!-- Nutrition quick -->
+        <div>
+          <div class="m-section">Nutrition Today</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--muted)">Calories</span>
+              <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)">1,840 / 2,800</span>
+            </div>
+            <div style="height:5px;background:var(--muted2);border-radius:3px;overflow:hidden">
+              <div style="width:66%;height:100%;background:linear-gradient(90deg,var(--teal),var(--accent));border-radius:3px"></div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
+              <span style="font-size:10px;background:rgba(53,116,241,0.1);color:var(--blue);border:1px solid rgba(53,116,241,0.2);padding:2px 7px;border-radius:4px">148g protein</span>
+              <span style="font-size:10px;background:rgba(0,212,170,0.1);color:var(--teal);border:1px solid rgba(0,212,170,0.2);padding:2px 7px;border-radius:4px">+Raw enzymes</span>
+              <span style="font-size:10px;background:rgba(200,241,53,0.1);color:var(--accent);border:1px solid rgba(200,241,53,0.2);padding:2px 7px;border-radius:4px">+Liver logged</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- spacer -->
+        <div style="height:8px"></div>
+
+      </div><!-- /mobile-body -->
+
+      <!-- nav bar -->
+      <div class="mobile-navbar">
+        <div class="m-nav-item active">
+          <div class="m-nav-icon">⬡</div>
+          <div class="m-nav-label">Home</div>
+        </div>
+        <div class="m-nav-item">
+          <div class="m-nav-icon">📊</div>
+          <div class="m-nav-label">Sectors</div>
+        </div>
+        <div class="m-nav-item">
+          <div class="m-nav-icon">🗓</div>
+          <div class="m-nav-label">History</div>
+        </div>
+        <div class="m-nav-item">
+          <div class="m-nav-icon">🥩</div>
+          <div class="m-nav-label">Nutrition</div>
+        </div>
+        <div class="m-nav-item">
+          <div class="m-nav-icon">💬</div>
+          <div class="m-nav-label">Ask</div>
+        </div>
+      </div>
+
+    </div><!-- /phone-screen -->
+  </div><!-- /phone-shell -->
+</div><!-- /mobile-overlay -->
+
+<script>
+  function go(sector) {
+    // Update views
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const view = document.getElementById('v-' + sector);
+    if (view) view.classList.add('active');
+
+    // Update sidebar nav
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    const navEl = document.querySelector(`.nav-item[data-sector="${sector}"]`);
+    if (navEl) navEl.classList.add('active');
+
+    // Update top tabs
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const tabMap = { dashboard: 0, insights: 1, chat: 2 };
+    if (sector in tabMap) document.querySelectorAll('.tab-btn')[tabMap[sector]].classList.add('active');
+
+    animateBars();
+  }
+
+  function animateBars() {
+    document.querySelectorAll('.stat-bar').forEach(bar => {
+      const w = bar.dataset.w;
+      if (!w) return;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = w; }, 60);
+    });
+  }
+
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      t.closest('.graph-toggles').querySelectorAll('.toggle').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+    });
+  });
+
+  function sendChat() {
+    const input = document.getElementById('main-chat-input');
+    const val = input.value.trim();
+    if (!val) return;
+    const log = document.getElementById('chat-log');
+
+    const q = document.createElement('div');
+    q.style.cssText = 'background:var(--surface2);padding:12px 16px;border-left:3px solid var(--muted);font-size:12px;line-height:1.65;color:var(--muted)';
+    q.textContent = val;
+    log.appendChild(q);
+
+    const a = document.createElement('div');
+    a.style.cssText = 'background:rgba(0,212,170,0.04);padding:12px 16px;border-left:3px solid var(--teal);font-size:12px;line-height:1.65;color:var(--muted)';
+    a.textContent = 'Analysing your data...';
+    log.appendChild(a);
+    log.scrollTop = log.scrollHeight;
+
+    setTimeout(() => {
+      a.style.color = 'var(--text)';
+      a.textContent = 'Connect your live data sources to unlock full AI analysis. Your patterns will be visible here once Supabase + OpenAI are wired up in the real build.';
+      log.scrollTop = log.scrollHeight;
+    }, 1000);
+
+    input.value = '';
+  }
+
+  animateBars();
+
+  function openMobile() {
+    document.getElementById('mobile-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobile() {
+    document.getElementById('mobile-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Close on backdrop click
+  document.getElementById('mobile-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeMobile();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+/* APEX Design System - Global Styles */
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  /* Sector Colors */
+  --accent: #c8f135;       /* SR / Retention - Lime green */
+  --blue: #3574f1;         /* Sleep, Business */
+  --gold: #ffcc00;         /* Energy */
+  --purple: #9b5de5;       /* Body Comp */
+  --orange: #ff7a2f;       /* Gym */
+  --pink: #ff3580;         /* Libido */
+  --teal: #00d4aa;         /* Nutrition */
+  --amber: #ff9f1c;        /* Mood */
+  --red: #ff3535;          /* Alerts */
+
+  /* System Colors */
+  --bg: #080810;           /* App background */
+  --surface: #0e0e1a;      /* Card backgrounds */
+  --surface2: #141428;     /* Nested cards */
+  --border: #1e1e35;       /* Borders and dividers */
+  --muted: #5a5a7a;        /* Secondary text */
+  --muted2: #2a2a45;       /* Empty bar tracks */
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+body {
+  background: var(--bg);
+  color: white;
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+main {
+  min-height: 100vh;
+  padding: 2rem;
+}

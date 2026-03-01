@@ -1,0 +1,849 @@
+APEX
+
+Personal Intelligence Dashboard
+
+  ---------------------------- ------------------------------------------
+  Document Type                Product Requirements Document
+
+  Product                      APEX — Personal Intelligence Dashboard
+
+  Version                      1.0 — Pre-Development
+
+  Date                         February 2026
+
+  Status                       Draft for Review
+
+  Author                       Jett
+  ---------------------------- ------------------------------------------
+
+Confidential — Internal Use Only
+
+1. Product Overview
+
+1.1 Vision Statement
+
+APEX is a personal intelligence dashboard that aggregates biometric,
+behavioural, and lifestyle data into a single interface, surfacing
+actionable insights about what genuinely drives an individual's peak
+performance. It speaks only when it has something worth saying.
+
+1.2 The Core Problem
+
+High-performing individuals track fragments of their health and
+performance across disconnected apps — a sleep tracker here, a gym log
+there, a calorie counter somewhere else. None of these tools talk to
+each other, none understand context, and none are capable of answering
+the question that actually matters:
+
+  "Why do I feel incredible some weeks and average others — and what
+  exactly caused it?"
+
+APEX solves this by treating data holistically, correlating inputs
+across sectors, and presenting them in a format that rewards engagement
+and makes pattern recognition intuitive.
+
+1.3 Design Philosophy
+
+-   Low friction, passive data collection wherever possible.
+
+-   The interface should feel like a dashboard built for a
+    high-performance athlete, not a patient.
+
+-   Notifications are scarce and high signal — maximum one per day,
+    earned by genuine pattern detection.
+
+-   Dopamine-inducing positive feedback when doing well. Visual rewards
+    for consistency.
+
+-   Brutally honest. No sugar-coating trend data.
+
+-   The app knows you. It uses calendar context, historical patterns,
+    and cross-sector correlations to give advice that generic apps
+    cannot.
+
+1.4 Target User
+
+APEX is built for a single user archetype initially: a health-conscious,
+performance-oriented individual who:
+
+-   Actively tracks multiple facets of their health and life.
+
+-   Follows an ancestral or primal nutrition philosophy (raw dairy,
+    grass-fed meat, organ consumption).
+
+-   Practises semen retention and understands its correlation with
+    performance metrics.
+
+-   Trains regularly and logs gym sessions.
+
+-   Maintains a detailed Google Calendar.
+
+-   Is entrepreneurially driven and understands the value of data-driven
+    decision making.
+
+-   Wants a single interface that replaces the five-app friction
+    currently required to understand their own patterns.
+
+2. Core Data Sectors
+
+APEX organises all tracked data into ten distinct sectors. Each sector
+has its own visual identity, data sources, and insight generation logic.
+All sectors feed into a composite daily Vitality Score.
+
+  ----------- ---------- ---------------- ------------------ ----------------
+  Sector      Colour     Primary Metric   Data Source        Input Type
+
+  SR /        Lime green Streak days      Manual             Passive
+  Retention                                                  
+
+  Sleep       Electric   Duration +       Apple Health /     Passive
+              blue       quality          Oura               
+
+  Energy      Gold       Morning score    Daily check-in     Active (30s)
+                         1–10                                
+
+  Gym         Orange     Volume &         Hevy API           Passive
+                         sessions                            
+
+  Libido      Pink       Daily score 1–10 Daily check-in     Active (30s)
+
+  Nutrition   Teal       Calories +       Photo log + manual Active (2 min)
+                         nutrients                           
+
+  Body Comp   Purple     Weight + body    Withings API       Passive
+                         fat %                               
+
+  Mood        Amber      Daily score 1–10 Daily check-in     Active (30s)
+
+  Finances    Teal       Monthly net cash Manual             Active (weekly)
+                         flow                                
+
+  Business    Blue       Focus score +    Manual + Calendar  Active (daily)
+                         projects                            
+  ----------- ---------- ---------------- ------------------ ----------------
+
+2.1 Vitality Score
+
+Each day is assigned a composite Vitality Score (1.0–10.0) synthesised
+from all active sectors, weighted by their historical correlation with
+subjective wellbeing. The score drives the colour-coded Historical
+Calendar view and enables long-term pattern analysis.
+
+  ---------------- ------------------------------------------------------
+  Formula          Weighted average: Energy (25%) + Mood (20%) + Libido
+                   (20%) + Sleep quality (20%) + SR day modifier (15%)
+
+  ---------------- ------------------------------------------------------
+
+The score is displayed prominently throughout the app — as a coloured
+cell in the calendar view (deep red → amber → lime green), as the
+central metric in the mobile home screen, and as the title metric in
+each Historical day detail panel.
+
+3. Screens & Views
+
+3.1 Dashboard (Home)
+
+The primary landing screen. Displays a live snapshot of the current day
+across all sectors.
+
+Components
+
+-   Topbar — Logo, tab navigation (Dashboard / Insights / Chat),
+    date/time chip, Morning Check-in CTA button.
+
+-   Sidebar — Grouped navigation for all sectors plus Overview and
+    Settings. Colour-coded with sector dot indicators. Active state with
+    coloured right border.
+
+-   Stat Tile Row — Five primary tiles (SR Streak, Sleep, Energy,
+    Weight, Gym). Each tile has: coloured gradient background, blurred
+    glow orb, metric value, sub-label, animated bottom progress bar,
+    hover glow effect, click-through to sector focus view.
+
+-   Active Insights Row — Four insight cards with type-coded left
+    borders (positive / warning / info / alert). Each card is clickable
+    and navigates to the relevant sector.
+
+-   Trends Graph — 30-day energy vs libido dual-line SVG chart with
+    gradient fill, toggle for 7D/30D/90D timeframes, and SR streak day
+    annotation.
+
+-   SR Card — Large standalone retention counter with personal best
+    comparison and streak start date.
+
+-   Right Panel — Fixed notifications feed, Quick Ask chat interface,
+    and integration status badges.
+
+3.2 Sector Focus Views
+
+Each sidebar sector navigates to a dedicated full-screen focus view. All
+sector views share a common layout pattern:
+
+-   Back button returning to Dashboard.
+
+-   Sector title (coloured to match sector identity) with data source
+    subtitle.
+
+-   Four mini-stat tiles showing key metrics.
+
+-   Primary SVG trend graph with timeframe toggles.
+
+-   Historical log table (where applicable).
+
+  ------------ ----------------------------------------------------------
+  Sector       Unique View Elements
+
+  Retention    Large SR counter card (64px), streak history table with
+               avg energy per streak, 90-day SR vs energy overlay graph
+               with reset markers.
+
+  Sleep        14-day duration chart, bedtime/wake time tracking, sleep
+               debt indicator.
+
+  Energy       30-day score trend, peak SR day correlation annotation.
+
+  Gym          Weekly volume trend (ascending), recent sessions table
+               with PR count, streak weeks.
+
+  Nutrition    Calorie progress bar, protein/fat/carb pills, daily food
+               log table — links to Nutrition Feed.
+
+  Libido       30-day score line chart, correlation with SR day and liver
+               consumption.
+
+  Body Comp    30-day weight trend (Withings), body fat percentage,
+               14-day delta, recomp trend detection.
+
+  Mood         30-day score trend, best correlation tags.
+
+  Finances     Monthly net, expenses, income, savings rate stats.
+
+  Business     Focus score, active project count, momentum indicator,
+               next calendar event.
+  ------------ ----------------------------------------------------------
+
+3.3 Nutrition Feed
+
+A standalone screen accessible from the Nutrition sector and from the
+top navigation. Designed as a dopamine-inducing vertical timeline feed —
+not a clinical calorie tracker.
+
+Day Navigation
+
+-   Left/right arrow navigation to swipe through previous days with a
+    smooth slide-in animation.
+
+-   Day header showing date, "Today" / "Yesterday" / "N days ago"
+    sub-label.
+
+-   Sticky daily totals bar showing calorie progress bar, macro pills
+    (kcal / protein / fat / carbs), and a Nutrition Score (1–10).
+
+The Feed Timeline
+
+Meals are rendered as cards on a vertical timeline with a coloured
+dot-and-line connector:
+
+-   Each meal card has: meal type tag (Breakfast / Lunch / Dinner /
+    Snack / Supplement, colour coded), meal name, calorie count, an
+    RPG-style stats panel (mini bars for calories/protein/fat/carbs),
+    and a nutrient bonus chip row.
+
+-   Nutrient bonus chips (green "+") appear dynamically based on what
+    was logged: +High Protein, +Vitamin A, +B12, +Raw Enzymes, +CLA,
+    +Zinc, +Omega-3, +Choline, +Fat-soluble Vitamins, +Vitamin K2.
+
+-   A pulsing red NOW marker sits at the current time within the feed.
+    Meals above it are past; the upcoming recommendation is below it.
+
+-   An expandable Ingredients Breakdown section appears on each card.
+
+Upcoming Recommendation
+
+Below the NOW marker, a dashed teal card displays APEX's recommended
+next meal. It considers:
+
+-   Remaining calorie budget for the day.
+
+-   SR day — higher SR day = higher protein and zinc priority.
+
+-   Calendar — if a gym session is scheduled, protein target increases.
+
+-   Current nutrient gaps (e.g., no liver logged this week → recommend
+    organ meat).
+
+Right Panel — Daily Summary
+
+-   Animated score ring (SVG, gradient fill) showing the day's Nutrition
+    Score.
+
+-   Full nutrient breakdown with individual bars (Vitamin A, B12, Zinc,
+    Iron, etc.).
+
+-   7-day calorie bar chart showing the week at a glance.
+
+-   Today's Wins — achievement list that populates as goals are met
+    (e.g., "Liver logged", "Zinc maxed", "Protein on track").
+
+Log Modal
+
+Triggered by the "+ Log Meal" button in the topbar. Fields: Meal type,
+Food name/description, Calories, Protein, Fat, Carbs, Photo upload
+(optional). Submitted meals animate into the feed and update all totals
+instantly.
+
+3.4 Historical Calendar View
+
+A dedicated screen for long-term pattern analysis. Accessible from the
+top navigation (History tab).
+
+Calendar Modes
+
+-   Month View — Standard calendar grid (Mon–Sun), each cell coloured by
+    Vitality Score. Cells show the day number, score badge, and event
+    dots (orange = gym, pink = social, gold = work). Hover lifts cell.
+    Click opens Day Detail panel.
+
+-   Week View — Four-week band showing daily score cells at larger size
+    with the same colour system.
+
+-   Year View — GitHub-style heatmap: all 12 months rendered as 31-cell
+    rows, allowing instant identification of high and low periods across
+    the year.
+
+Day Detail Panel (right side)
+
+Clicking any day opens a rich breakdown in the right panel:
+
+-   Date heading + Vitality Score (large, colour-coded).
+
+-   Metrics table: Energy, Mood, Libido, Sleep, Weight, SR Day, Gym,
+    Liver, Raw Milk, Oysters.
+
+-   Calendar Events: Synced Google Calendar entries for that day with
+    time and colour-coded event type.
+
+-   APEX Analysis: A written analysis (2–4 sentences) explaining why the
+    day scored as it did, with supporting green "+positive" chips and
+    amber "warning" chips.
+
+Month Averages Sparklines
+
+Below the calendar grid, a row of horizontal bar charts shows monthly
+averages for Vitality, Energy, Mood, Libido, Sleep, and Gym Days —
+enabling fast month-to-month comparison.
+
+3.5 Insights View
+
+A consolidated list of all APEX-generated insights with full text,
+confidence level, and contributing sectors. Each insight card shows its
+detection timestamp and the data sources that generated it.
+
+3.6 Chat / Ask APEX
+
+A conversational interface backed by the full personal data store. The
+user can ask natural language questions and receive data-grounded
+answers.
+
+Example queries
+
+-   "What was I eating when I felt best last month?"
+
+-   "Why has my libido been lower this week?"
+
+-   "What does my best week look like in data?"
+
+-   "Should I go to the gym today given my sleep?"
+
+-   "How does my mood correlate with my SR streak?"
+
+3.7 Mobile View
+
+A phone-optimised layout accessible from the desktop dashboard via the
+"Mobile View" button (bottom-right). Renders a realistic iPhone shell in
+an overlay.
+
+Mobile layout differences from desktop
+
+-   No sidebar — replaced by a 5-tab bottom navigation bar (Home /
+    Sectors / History / Nutrition / Ask).
+
+-   Hero card replaces the stat tile grid — shows SR streak as the
+    primary metric with energy/sleep/mood sub-chips.
+
+-   Horizontal scroll for sector cards — swipe through Sleep, Energy,
+    Weight, Gym, Libido tiles.
+
+-   Morning check-in CTA is a prominent full-width button.
+
+-   Rounded card styling (12–16px radius) throughout — native mobile
+    feel.
+
+-   Mini-graph card showing the 14-day energy trend.
+
+-   Nutrition quick-card with calorie bar and nutrient bonus chips.
+
+4. Intelligence Layer
+
+4.1 Insight Generation
+
+APEX runs a nightly pattern detection job across all stored data.
+Insight generation logic:
+
+-   Cross-sector correlation detection — identifies when two or more
+    sectors diverge from their norm simultaneously.
+
+-   SR streak milestone detection — at days 7, 10, 14, 21, 30, triggers
+    a performance window notification.
+
+-   Nutritional gap detection — if a high-correlation food (liver, raw
+    milk, oysters) hasn't been logged in N days, surfaces a warning with
+    the last-seen correlation data.
+
+-   Sleep debt accumulation — 3 consecutive nights under threshold
+    triggers a recovery recommendation, cross-referenced with upcoming
+    calendar whitespace.
+
+-   Calendar context integration — knows what's in the user's Google
+    Calendar and uses it to personalise recommendations (e.g., "you have
+    a rest day tomorrow — ideal sleep window").
+
+-   Recomp trend detection — if weight is declining while gym volume is
+    increasing over a 14+ day window, flags lean mass gain.
+
+4.2 Notification Rules
+
+APEX enforces strict notification discipline to avoid alert fatigue:
+
+-   Maximum 1 push notification per day.
+
+-   Notifications are tiered: Performance (SR milestones, trend peaks) →
+    Warnings (nutritional gaps, sleep debt) → Reminders (morning
+    check-in).
+
+-   Morning check-in prompt delivered at a user-configured time (default
+    8am).
+
+-   Notifications are suppressed if the user has already completed their
+    check-in.
+
+4.3 Chat Memory Bank
+
+The APEX Chat interface queries a structured memory bank built from all
+ingested data:
+
+-   Full historical log of every sector for every day.
+
+-   Calendar events with timestamps and categories.
+
+-   Nutrition logs including specific foods and associated nutrient
+    bonuses.
+
+-   Detected patterns and previously surfaced insights.
+
+The AI layer (Claude / GPT-4o) is given this context at query time and
+generates grounded, specific answers — not generic health advice.
+
+5. Technical Architecture
+
+5.1 Stack Overview
+
++-----------------+-----------------+-----------------+-----------------+
+| Mobile          | Desktop         | Backend         | AI Layer        |
+|                 |                 |                 |                 |
+| React Native    | Next.js         | Supabase        | Claude / GPT-4o |
+| (Expo)          |                 |                 |                 |
++-----------------+-----------------+-----------------+-----------------+
+
+5.2 Data Layer
+
+All data is persisted in Supabase (PostgreSQL). Core tables:
+
+-   daily_checkins — morning/evening scores for energy, mood, libido, SR
+    day.
+
+-   sleep_logs — duration, bedtime, wake time, quality score (synced
+    from Apple Health / Oura).
+
+-   gym_sessions — session date, exercise list, total volume, PR flags
+    (synced from Hevy).
+
+-   body_metrics — weight, body fat %, muscle mass (synced from
+    Withings).
+
+-   nutrition_logs — per-meal entries with photo URL, macros, food name,
+    meal type, nutrient flags.
+
+-   calendar_events — synced Google Calendar entries with event name,
+    time, duration, auto-categorised (work/gym/social/other).
+
+-   insights — generated insight records with timestamp, type,
+    confidence, sector tags.
+
+5.3 Integrations
+
+  ---------------------- ------------------ -------------- ---------------
+  Feature                Description        Priority       Phase
+
+  Hevy API               Real-time gym      P0             Phase 2
+                         session sync —                    
+                         sets, reps,                       
+                         weight, PRs                       
+
+  Apple Health           Sleep duration,    P0             Phase 2
+                         HRV, steps via                    
+                         HealthKit export                  
+
+  Withings API           Body composition:  P0             Phase 2
+                         weight, body fat                  
+                         %, muscle mass                    
+
+  Google Calendar        Event context for  P1             Phase 2
+                         smart                             
+                         notifications and                 
+                         recommendations                   
+
+  Oura Ring              Alternative to     P2             Phase 3
+                         Apple Health for                  
+                         sleep and HRV                     
+
+  Camera / Photo AI      Food photo → macro P1             Phase 3
+                         estimation via                    
+                         GPT-4 Vision                      
+  ---------------------- ------------------ -------------- ---------------
+
+5.4 AI Pipeline
+
+-   Nightly batch job: runs correlation analysis across all sectors,
+    generates insight candidates, filters by confidence threshold,
+    writes top candidate to insights table.
+
+-   Chat: user query → relevant data context assembled from Supabase →
+    sent to Claude claude-sonnet-4-6 with structured prompt → response
+    streamed to UI.
+
+-   Nutrition photo AI: photo uploaded → sent to GPT-4o Vision with
+    prompt "estimate macros for this meal" → returns structured JSON →
+    pre-fills log modal.
+
+6. Feature Requirements
+
+6.1 Phase 1 — Manual Baseline (Weeks 1–4)
+
+The MVP is functional without any API integrations. All data is entered
+manually or via check-in prompts. Goal: establish baseline data and
+validate the insight engine with real input.
+
+  ---------------------- ------------------------ ----------- ------------
+  Feature                Description              Priority    Phase
+
+  Morning check-in       Log energy, mood, libido P0          Phase 1
+                         scores (1–10) + SR day               
+                         in under 2 minutes                   
+
+  Dashboard view         Stat tiles, insights     P0          Phase 1
+                         row, trend graph, SR                 
+                         card, right panel                    
+
+  Nutrition feed         Manual meal logging with P0          Phase 1
+                         type, macros, photo                  
+                         upload, RPG stat chips               
+
+  Historical calendar    Month/week/year views,   P0          Phase 1
+                         Vitality Score colour                
+                         system, day detail panel             
+
+  Sector focus views     All 10 sectors with      P0          Phase 1
+                         manual data entry and                
+                         basic charts                         
+
+  APEX Chat              Text-in / text-out chat  P1          Phase 1
+                         interface backed by                  
+                         stored data                          
+
+  Mobile view            Phone-optimised layout   P1          Phase 1
+                         with bottom nav and hero             
+                         card                                 
+
+  Notification system    Max 1/day push           P1          Phase 1
+                         notification with                    
+                         priority queue                       
+  ---------------------- ------------------------ ----------- ------------
+
+6.2 Phase 2 — API Sync (Weeks 4–8)
+
+Passive data collection replaces manual entry for gym, sleep, and body
+metrics.
+
+  ---------------------- ------------------------ ----------- ------------
+  Feature                Description              Priority    Phase
+
+  Hevy sync              Automatic workout import P0          Phase 2
+                         including exercise,                  
+                         sets, reps, volume, PRs              
+
+  Apple Health sync      Sleep duration and       P0          Phase 2
+                         quality import via                   
+                         HealthKit                            
+
+  Withings sync          Daily weight and body    P0          Phase 2
+                         fat % import                         
+
+  Google Calendar sync   Event import with        P1          Phase 2
+                         auto-categorisation                  
+                         (work/gym/social)                    
+
+  Integration status UI  Live/connected/error     P0          Phase 2
+                         badges in sidebar and                
+                         integrations view                    
+  ---------------------- ------------------------ ----------- ------------
+
+6.3 Phase 3 — Intelligence (Weeks 8–12)
+
+The pattern detection and AI layers are activated once sufficient data
+exists.
+
+  ---------------------- ------------------------ ----------- ------------
+  Feature                Description              Priority    Phase
+
+  Nightly insight job    Automated cross-sector   P0          Phase 3
+                         pattern detection with               
+                         confidence scoring                   
+
+  SR correlation         Quantified relationship  P0          Phase 3
+  analysis               between SR day and all               
+                         other sectors                        
+
+  Nutrition AI           GPT-4 Vision macro       P1          Phase 3
+  estimation             estimation from meal                 
+                         photos                               
+
+  Sleep debt detection   Accumulation tracking +  P1          Phase 3
+                         calendar-aware recovery              
+                         recommendations                      
+
+  Meal recommendations   Calorie gap + nutrient   P1          Phase 3
+                         deficiency + SR                      
+                         day-aware suggestions                
+
+  Recomp detection       Automated weight + gym   P2          Phase 3
+                         volume trend correlation             
+  ---------------------- ------------------------ ----------- ------------
+
+6.4 Phase 4 — Polish & Expansion (Weeks 12–16)
+
+  ---------------------- ------------------------ ----------- ------------
+  Feature                Description              Priority    Phase
+
+  PC dashboard           Full desktop layout with P0          Phase 4
+                         sidebar, three-column                
+                         grid, detailed charts                
+
+  Chat memory bank       Full historical context  P0          Phase 4
+                         wired into the chat AI               
+                         layer                                
+
+  Oura integration       Alternative sleep/HRV    P2          Phase 4
+                         source with richer                   
+                         scoring                              
+
+  Export & reports       Weekly/monthly PDF       P2          Phase 4
+                         summary of all sectors               
+                         and insights                         
+
+  Sharing                Optional streak sharing  P3          Phase 4
+                         (SR, gym streak) for                 
+                         accountability                       
+  ---------------------- ------------------------ ----------- ------------
+
+7. Design System
+
+7.1 Visual Identity
+
+APEX uses a dark, high-contrast aesthetic with sharp colour accents. The
+aesthetic intentionally evokes performance dashboards — F1 telemetry,
+sports analytics tools, biohacking interfaces — rather than consumer
+wellness apps.
+
+Colour System
+
+  ---------------- --------------- ---------------- ----------------------
+  Token            Hex             Usage            Sector
+
+  --accent         #c8f135         Primary accent,  SR / Retention
+                                   SR, Vitality     
+                                   Score            
+
+  --blue           #3574f1         Sleep sector,    Sleep / Business
+                                   business         
+
+  --gold           #ffcc00         Energy, morning, Energy
+                                   warmth           
+
+  --purple         #9b5de5         Body composition Body Comp
+
+  --orange         #ff7a2f         Gym performance  Gym
+
+  --pink           #ff3580         Libido,          Libido
+                                   relationship     
+
+  --teal           #00d4aa         Nutrition,       Nutrition
+                                   positive AI      
+
+  --amber          #ff9f1c         Mood tracking    Mood
+
+  --red            #ff3535         Alerts, NOW      System
+                                   marker           
+
+  --bg             #080810         App background   System
+
+  --surface        #0e0e1a         Card backgrounds System
+
+  --muted          #5a5a7a         Secondary text,  System
+                                   labels           
+  ---------------- --------------- ---------------- ----------------------
+
+Typography
+
+-   Display / Headings: Syne (Google Fonts) — 400, 600, 700, 800
+    weights. Used for sector titles, metric values, score numbers, card
+    headings.
+
+-   Body / Monospace: DM Mono — 300, 400, 500 weights. Used for all
+    labels, tags, timestamps, data values, body copy. Reinforces the
+    data/technical aesthetic.
+
+Spacing & Layout
+
+-   Desktop: 3-column grid — 220px sidebar / flexible main / 300px right
+    panel. 58px topbar.
+
+-   Mobile: Full-bleed single column with 16px horizontal padding. 58px
+    bottom nav bar.
+
+-   Card padding: 16–20px. Gap between cards: 10–14px.
+
+Motion
+
+-   Stat bar animations: cubic-bezier(0.4, 0, 0.2, 1), 1.2s duration.
+    Triggered on view load.
+
+-   View transitions: fadeUp — opacity 0→1, translateY 8px→0, 0.3s ease.
+
+-   Meal cards: slideIn — opacity 0→1, translateX -12px→0, staggered
+    80ms per card.
+
+-   Bonus chips: popIn — scale 0.8→1, 0.3s ease, staggered 50ms per
+    chip.
+
+-   Phone shell modal: translateY 20px→0, cubic-bezier spring bounce,
+    0.35s.
+
+8. Build Phases & Timeline
+
+  ---------- ---------------- ------------------------------ --------------
+  Phase      Timeline         Deliverables                   Goal
+
+  Phase 1    Weeks 1–4        Manual check-in system, all    Prove the
+                              sector views, nutrition feed,  concept with
+                              historical calendar, basic     real data,
+                              chat UI                        establish
+                                                             daily logging
+                                                             habit
+
+  Phase 2    Weeks 4–8        Hevy / Withings / Apple Health Eliminate
+                              / Google Calendar API          manual data
+                              integrations, passive data     entry for
+                              pipeline                       passive inputs
+
+  Phase 3    Weeks 8–12       Nightly insight engine, AI     Activate the
+                              nutrition estimation, meal     intelligence
+                              recommendations, sleep debt    layer — APEX
+                              detection                      starts
+                                                             speaking
+
+  Phase 4    Weeks 12–16      PC dashboard polish, full chat Full product —
+                              memory bank, Oura integration, ready for
+                              PDF reports                    wider use
+  ---------- ---------------- ------------------------------ --------------
+
+8.1 Success Metrics
+
+APEX will be considered successful at the end of Phase 1 if:
+
+-   Daily check-in completion rate exceeds 80% over a 30-day period.
+
+-   At least 3 cross-sector correlations are detected and verified by
+    the user as accurate.
+
+-   The Nutrition Feed is used to log at least 2 meals per day on
+    average.
+
+-   The Historical Calendar shows a visible pattern between SR streak
+    days and high Vitality Score weeks.
+
+At Phase 3 completion:
+
+-   APEX Chat can accurately answer 5 of 5 test queries about historical
+    patterns.
+
+-   Insight accuracy (user-rated as correct) exceeds 70%.
+
+-   Nutrition photo AI macro estimation is within 20% of manual entry on
+    80% of meals.
+
+9. Out of Scope (v1)
+
+The following features are explicitly excluded from the initial build to
+maintain focus:
+
+-   Multi-user support — APEX v1 is a single-user personal tool.
+
+-   Social features — no public profiles, leaderboards, or community
+    sharing.
+
+-   Wearable companion app — APEX reads from Apple Health and Oura via
+    their APIs but does not replace these apps.
+
+-   Automated financial data sync — finances remain manual entry only.
+
+-   Prescription or medical advice — APEX provides pattern observations,
+    not clinical recommendations.
+
+-   Paid subscription model — the app is personal infrastructure, not a
+    commercial product in v1.
+
+10. Open Questions & Decisions Needed
+
+  --- --------------------------------- ---------------------------------
+  #   Question                          Options / Notes
+
+  1   AI provider for Chat: Claude vs   Claude offers better
+      GPT-4o?                           instruction-following; GPT-4o
+                                        stronger for Vision (nutrition
+                                        photos). Could use both.
+
+  2   Where does SR day reset logic     Manual button tap, or infer from
+      live?                             journal/check-in data? Button is
+                                        simplest and most reliable.
+
+  3   How are nutrition macros          Fully manual, AI estimation from
+      validated?                        photo, or barcode scan? Phase 1:
+                                        manual. Phase 3: photo AI.
+
+  4   Evening check-in: required or     Evening check-in could capture
+      optional?                         libido, mood end-of-day, and
+                                        journal entry. Risk: adds
+                                        friction. Suggest optional.
+
+  5   How granular should Calendar      Auto-categorise into Work / Gym /
+      event categorisation be?          Social / Health / Other using
+                                        keyword matching, or manual
+                                        tagging?
+
+  6   What is the Vitality Score        Current prototype: Energy 25% +
+      weighting formula?                Mood 20% + Libido 20% + Sleep
+                                        20% + SR modifier 15%. Validate
+                                        with real data.
+  --- --------------------------------- ---------------------------------

@@ -1,0 +1,50 @@
+APEX MVP — Implementation Plan Updates
+For Antigravity IDE — addendum to implementation_plan2.md
+================================================================================
+
+Two things to clarify before you start building.
+
+────────────────────────────────────────────────────────────────────────────────
+1. SOURCE FILE NAMES
+────────────────────────────────────────────────────────────────────────────────
+
+The plan references APEX_demo2.html as the dashboard and mobile overlay source.
+That file does not exist. The correct source files are:
+
+  APEX_prototype.html   —  Dashboard, all 10 sector views, Insights, Chat,
+                            Integrations, AND the mobile phone overlay toggle
+                            (📱 button, iPhone shell, 5-tab mobile nav).
+                            This is the primary source file.
+
+  APEX_history.html     —  Historical Calendar (month/week/year views, day
+                            detail panel, sparklines). Use as-is.
+
+  APEX_nutrition.html   —  Nutrition Feed (timeline, meal cards, NOW marker,
+                            log modal). Use as-is.
+
+Use APEX_prototype.html wherever the plan says APEX_demo2.html.
+
+────────────────────────────────────────────────────────────────────────────────
+2. NUTRITION FEED RIGHT PANEL — DON'T MISS THIS
+────────────────────────────────────────────────────────────────────────────────
+
+The Nutrition Feed has a right panel that is a distinct component inside
+APEX_nutrition.html. It needs to come across intact when merging into the
+unified SPA. Make sure it is included — it is not just the feed timeline.
+
+The right panel contains:
+
+  - Animated SVG score ring (Nutrition Score 1-10, gradient stroke fill,
+    animates on load)
+  - Full nutrient breakdown bars (Calories, Protein, Fat, Carbs, Vitamin A,
+    B12, Zinc, Iron — bars turn lime green + show tick when goal met)
+  - 7-day calorie bar chart (week at a glance)
+  - Today's Wins list (populates dynamically as nutritional goals are hit,
+    e.g. "Liver logged — B12 maxed", "Protein on track")
+
+This panel updates in real time as meals are logged. Wire it to the same demo
+data store as the feed timeline — they share state.
+
+================================================================================
+END OF UPDATES
+================================================================================

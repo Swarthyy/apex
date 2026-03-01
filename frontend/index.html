@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX — The Dashboard For Your Life</title>
+    <meta name="description"
+        content="APEX Personal Intelligence Dashboard — aggregate biometric, behavioural, and lifestyle data into actionable insights.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/src/styles.css">
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- TOPBAR                                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="logo" onclick="go('dashboard')">
+                <span class="logo-icon">◆</span>
+                <span class="logo-text">APEX</span>
+            </div>
+            <div class="top-tabs">
+                <div class="top-tab active" data-tab="dashboard" onclick="go('dashboard')">Dashboard</div>
+                <div class="top-tab" data-tab="insights" onclick="go('insights')">Insights</div>
+                <div class="top-tab" data-tab="chat" onclick="go('chat')">Chat</div>
+                <div class="top-tab" data-tab="history" onclick="go('history')">History</div>
+                <div class="top-tab" data-tab="nutrition" onclick="go('nutrition')">Nutrition</div>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="date-chip" id="date-chip"></div>
+            <button class="btn-checkin" id="btn-checkin" onclick="openCheckin()">☀ Morning Check-in</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SIDEBAR                                                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">OVERVIEW</div>
+            <div class="sidebar-item active" data-view="dashboard" onclick="go('dashboard')">
+                <span class="sidebar-dot" style="background:var(--accent)"></span> Dashboard
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">SECTORS</div>
+            <div class="sidebar-item" data-view="retention" onclick="go('retention')">
+                <span class="sidebar-dot" style="background:var(--accent)"></span> SR / Retention
+            </div>
+            <div class="sidebar-item" data-view="sleep" onclick="go('sleep')">
+                <span class="sidebar-dot" style="background:var(--blue)"></span> Sleep
+            </div>
+            <div class="sidebar-item" data-view="energy" onclick="go('energy')">
+                <span class="sidebar-dot" style="background:var(--gold)"></span> Energy
+            </div>
+            <div class="sidebar-item" data-view="gym" onclick="go('gym')">
+                <span class="sidebar-dot" style="background:var(--orange)"></span> Gym
+            </div>
+            <div class="sidebar-item" data-view="libido" onclick="go('libido')">
+                <span class="sidebar-dot" style="background:var(--pink)"></span> Libido
+            </div>
+            <div class="sidebar-item" data-view="nutrition-sector" onclick="go('nutrition-sector')">
+                <span class="sidebar-dot" style="background:var(--teal)"></span> Nutrition
+            </div>
+            <div class="sidebar-item" data-view="body" onclick="go('body')">
+                <span class="sidebar-dot" style="background:var(--purple)"></span> Body Comp
+            </div>
+            <div class="sidebar-item" data-view="mood" onclick="go('mood')">
+                <span class="sidebar-dot" style="background:var(--amber)"></span> Mood
+            </div>
+            <div class="sidebar-item" data-view="finances" onclick="go('finances')">
+                <span class="sidebar-dot" style="background:var(--teal)"></span> Finances
+            </div>
+            <div class="sidebar-item" data-view="business" onclick="go('business')">
+                <span class="sidebar-dot" style="background:var(--blue)"></span> Business
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">SYSTEM</div>
+            <div class="sidebar-item" data-view="integrations" onclick="go('integrations')">
+                <span class="sidebar-dot" style="background:var(--muted)"></span> Integrations
+            </div>
+            <div class="sidebar-item" data-view="settings" onclick="go('settings')">
+                <span class="sidebar-dot" style="background:var(--muted)"></span> Settings
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT AREA                                                      -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="main-content">
+
+        <!-- ─── DASHBOARD VIEW ─────────────────────────────────────────────── -->
+        <div class="view active" id="view-dashboard">
+            <div class="stat-tiles" id="stat-tiles"></div>
+
+            <div class="insights-row" id="insights-row"></div>
+
+            <div class="trends-section">
+                <div class="section-header">
+                    <span class="section-title">Trends</span>
+                    <div class="graph-toggles">
+                        <button class="graph-toggle active" onclick="setGraphRange('7d',this)">7D</button>
+                        <button class="graph-toggle" onclick="setGraphRange('30d',this)">30D</button>
+                        <button class="graph-toggle" onclick="setGraphRange('90d',this)">90D</button>
+                    </div>
+                </div>
+                <div class="trends-chart" id="trends-chart"></div>
+            </div>
+
+            <div class="sr-card" id="sr-card"></div>
+        </div>
+
+        <!-- ─── SECTOR FOCUS VIEWS ─────────────────────────────────────────── -->
+        <div class="view" id="view-retention">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--accent)">SR / Retention <span class="sector-subtitle">Manual
+                    Tracking</span></div>
+            <div class="sector-stats" id="retention-stats"></div>
+            <div class="sector-chart" id="retention-chart"></div>
+            <div class="sector-table" id="retention-table"></div>
+        </div>
+
+        <div class="view" id="view-sleep">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--blue)">Sleep <span class="sector-subtitle">Apple Health /
+                    Oura</span></div>
+            <div class="sector-stats" id="sleep-stats"></div>
+            <div class="sector-chart" id="sleep-chart"></div>
+            <div class="sector-table" id="sleep-table"></div>
+        </div>
+
+        <div class="view" id="view-energy">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--gold)">Energy <span class="sector-subtitle">Daily
+                    Check-in</span></div>
+            <div class="sector-stats" id="energy-stats"></div>
+            <div class="sector-chart" id="energy-chart"></div>
+            <div class="sector-table" id="energy-table"></div>
+        </div>
+
+        <div class="view" id="view-gym">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--orange)">Gym <span class="sector-subtitle">Hevy API</span>
+            </div>
+            <div class="sector-stats" id="gym-stats"></div>
+            <div class="sector-chart" id="gym-chart"></div>
+            <div class="sector-table" id="gym-table"></div>
+        </div>
+
+        <div class="view" id="view-libido">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--pink)">Libido <span class="sector-subtitle">Daily
+                    Check-in</span></div>
+            <div class="sector-stats" id="libido-stats"></div>
+            <div class="sector-chart" id="libido-chart"></div>
+            <div class="sector-table" id="libido-table"></div>
+        </div>
+
+        <div class="view" id="view-nutrition-sector">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--teal)">Nutrition <span class="sector-subtitle">Manual + Photo
+                    Log</span></div>
+            <div class="sector-stats" id="nutrition-sector-stats"></div>
+            <div class="sector-chart" id="nutrition-sector-chart"></div>
+            <button class="btn-feed-link" onclick="go('nutrition')">Open Full Nutrition Feed →</button>
+        </div>
+
+        <div class="view" id="view-body">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--purple)">Body Composition <span
+                    class="sector-subtitle">Withings API</span></div>
+            <div class="sector-stats" id="body-stats"></div>
+            <div class="sector-chart" id="body-chart"></div>
+            <div class="sector-table" id="body-table"></div>
+        </div>
+
+        <div class="view" id="view-mood">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--amber)">Mood <span class="sector-subtitle">Daily
+                    Check-in</span></div>
+            <div class="sector-stats" id="mood-stats"></div>
+            <div class="sector-chart" id="mood-chart"></div>
+            <div class="sector-table" id="mood-table"></div>
+        </div>
+
+        <div class="view" id="view-finances">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--teal)">Finances <span class="sector-subtitle">Manual
+                    Tracking</span></div>
+            <div class="sector-stats" id="finances-stats"></div>
+            <div class="sector-chart" id="finances-chart"></div>
+            <div class="sector-table" id="finances-table"></div>
+        </div>
+
+        <div class="view" id="view-business">
+            <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
+            <div class="sector-header" style="color:var(--blue)">Business <span class="sector-subtitle">Manual +
+                    Calendar</span></div>
+            <div class="sector-stats" id="business-stats"></div>
+            <div class="sector-chart" id="business-chart"></div>
+            <div class="sector-table" id="business-table"></div>
+        </div>
+
+        <!-- ─── INSIGHTS VIEW ──────────────────────────────────────────────── -->
+        <div class="view" id="view-insights">
+            <div class="page-header">All Insights</div>
+            <div class="insights-list" id="insights-list"></div>
+        </div>
+
+        <!-- ─── CHAT VIEW ──────────────────────────────────────────────────── -->
+        <div class="view" id="view-chat">
+            <div class="page-header">Ask APEX</div>
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-msg apex">
+                        <div class="chat-avatar">◆</div>
+                        <div class="chat-bubble">Hey Jett. I have your full data loaded. Ask me anything about your
+                            performance, nutrition, sleep, or trends. I'll answer with your actual data — no generic
+                            advice.</div>
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Ask about your data..."
+                        onkeydown="if(event.key==='Enter')sendChat()">
+                    <button class="chat-send" onclick="sendChat()">→</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── INTEGRATIONS VIEW ──────────────────────────────────────────── -->
+        <div class="view" id="view-integrations">
+            <div class="page-header">Integrations</div>
+            <div class="integrations-grid" id="integrations-grid"></div>
+        </div>
+
+        <!-- ─── SETTINGS VIEW ─────────────────────────────────────────────── -->
+        <div class="view" id="view-settings">
+            <div class="page-header">Settings</div>
+            <div class="settings-content">
+                <div class="settings-group">
+                    <div class="settings-label">Morning Check-in Time</div>
+                    <input type="time" class="settings-input" value="08:00">
+                </div>
+                <div class="settings-group">
+                    <div class="settings-label">Evening Check-in (Optional)</div>
+                    <input type="time" class="settings-input" value="21:00">
+                </div>
+                <div class="settings-group">
+                    <div class="settings-label">Calorie Goal</div>
+                    <input type="number" class="settings-input" value="3200">
+                </div>
+                <div class="settings-group">
+                    <div class="settings-label">Protein Goal (g)</div>
+                    <input type="number" class="settings-input" value="200">
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── HISTORY VIEW ───────────────────────────────────────────────── -->
+        <div class="view" id="view-history">
+            <div class="history-layout">
+                <div class="history-main">
+                    <div class="history-header">
+                        <div class="history-title">Historical View</div>
+                        <div class="history-nav">
+                            <button class="nav-arrow" onclick="calNavPrev()">‹</button>
+                            <span class="cal-month-label" id="cal-month-label"></span>
+                            <button class="nav-arrow" onclick="calNavNext()">›</button>
+                        </div>
+                        <div class="view-toggles">
+                            <button class="vt-btn active" onclick="setCalView('month',this)">Month</button>
+                            <button class="vt-btn" onclick="setCalView('week',this)">Week</button>
+                            <button class="vt-btn" onclick="setCalView('year',this)">Year</button>
+                        </div>
+                    </div>
+                    <div class="cal-day-labels">
+                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                    <div id="month-view" style="display:flex">
+                        <div class="cal-grid" id="cal-grid"></div>
+                    </div>
+                    <div class="week-view" id="week-view">
+                        <div id="week-grid"></div>
+                    </div>
+                    <div class="year-view" id="year-view">
+                        <div id="year-grid"></div>
+                    </div>
+                    <div class="sparkline-section" id="sparkline-section">
+                        <div class="sparkline-header">Month Averages</div>
+                        <div id="sparkline-rows"></div>
+                    </div>
+                </div>
+                <div class="history-detail" id="history-detail">
+                    <div class="detail-placeholder" id="detail-placeholder">
+                        <div class="detail-placeholder-icon">📅</div>
+                        <div>Click a day to see details</div>
+                    </div>
+                    <div class="detail-content" id="detail-content" style="display:none">
+                        <div class="detail-date" id="d-date"></div>
+                        <div class="detail-score" id="d-score"></div>
+                        <div class="detail-section-label">Metrics</div>
+                        <div id="d-metrics"></div>
+                        <div class="detail-section-label">Calendar Events</div>
+                        <div id="d-events"></div>
+                        <div class="detail-section-label">Analysis</div>
+                        <div id="d-analysis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── NUTRITION FEED VIEW ────────────────────────────────────────── -->
+        <div class="view" id="view-nutrition">
+            <div class="nutrition-layout">
+                <div class="nutrition-main">
+                    <div class="nutrition-header">
+                        <button class="nav-arrow" onclick="nutNavPrev()">‹</button>
+                        <div class="nutrition-day-info">
+                            <div class="nutrition-day-title" id="nut-day-title">Today</div>
+                            <div class="nutrition-day-date" id="nut-day-date"></div>
+                        </div>
+                        <button class="nav-arrow" onclick="nutNavNext()">›</button>
+                        <button class="btn-log-meal" onclick="openMealLog()">+ Log Meal</button>
+                    </div>
+                    <div class="nutrition-totals" id="nut-totals"></div>
+                    <div class="nutrition-timeline" id="nut-timeline"></div>
+                </div>
+                <div class="nutrition-panel">
+                    <div class="nut-score-ring-wrap">
+                        <svg class="nut-score-ring" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--muted2)" stroke-width="8" />
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="url(#nutGrad)" stroke-width="8"
+                                stroke-linecap="round" stroke-dasharray="327" id="nut-score-arc" stroke-dashoffset="327"
+                                transform="rotate(-90 60 60)" />
+                            <defs>
+                                <linearGradient id="nutGrad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="var(--teal)" />
+                                    <stop offset="100%" stop-color="var(--accent)" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="nut-score-value" id="nut-score-value">0</div>
+                        <div class="nut-score-label">Nutrition Score</div>
+                    </div>
+                    <div class="nut-nutrient-bars" id="nut-nutrient-bars"></div>
+                    <div class="nut-weekly-chart">
+                        <div class="nut-weekly-title">7-Day Calories</div>
+                        <div class="nut-weekly-bars" id="nut-weekly-bars"></div>
+                    </div>
+                    <div class="nut-wins">
+                        <div class="nut-wins-title">Today's Wins</div>
+                        <div class="nut-wins-list" id="nut-wins-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main-content -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- RIGHT PANEL (Dashboard)                                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="right-panel" id="right-panel">
+        <div class="rp-section">
+            <div class="rp-title">Notifications</div>
+            <div class="rp-notifications" id="rp-notifications"></div>
+        </div>
+        <div class="rp-section">
+            <div class="rp-title">Quick Ask</div>
+            <div class="rp-chat">
+                <div class="rp-chat-msg" id="rp-chat-prev"></div>
+                <div class="rp-chat-input-row">
+                    <input type="text" class="rp-chat-input" placeholder="Quick question..."
+                        onkeydown="if(event.key==='Enter'){go('chat');document.getElementById('chat-input').value=this.value;this.value='';sendChat()}">
+                </div>
+            </div>
+        </div>
+        <div class="rp-section">
+            <div class="rp-title">Integrations</div>
+            <div class="rp-integrations" id="rp-integrations"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- MOBILE TOGGLE + PHONE OVERLAY                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="toggleMobile()">📱</button>
+
+    <div class="mobile-overlay" id="mobile-overlay" style="display:none">
+        <div class="phone-shell">
+            <div class="phone-close" onclick="toggleMobile()">✕</div>
+            <div class="phone-dynamic-island"></div>
+            <div class="phone-status-bar">
+                <span>9:41</span>
+                <span class="phone-status-icons">
+                    <span>⬤⬤⬤⬤</span>
+                    <span>WiFi</span>
+                    <span>🔋</span>
+                </span>
+            </div>
+            <div class="phone-content" id="phone-content">
+                <!-- Mobile Home -->
+                <div class="mob-view active" id="mob-home">
+                    <div class="mob-hero" id="mob-hero"></div>
+                    <div class="mob-checkin-btn" onclick="openCheckin()">☀ Morning Check-in</div>
+                    <div class="mob-sector-scroll" id="mob-sector-scroll"></div>
+                    <div class="mob-insights" id="mob-insights"></div>
+                    <div class="mob-mini-graph" id="mob-mini-graph"></div>
+                    <div class="mob-nutrition-card" id="mob-nutrition-card"></div>
+                </div>
+                <!-- Mobile Sectors -->
+                <div class="mob-view" id="mob-sectors">
+                    <div class="mob-page-title">Sectors</div>
+                    <div class="mob-sector-list" id="mob-sector-list"></div>
+                </div>
+                <!-- Mobile History -->
+                <div class="mob-view" id="mob-history">
+                    <div class="mob-page-title">History</div>
+                    <div class="mob-history-content" id="mob-history-content"></div>
+                </div>
+                <!-- Mobile Nutrition -->
+                <div class="mob-view" id="mob-nutrition">
+                    <div class="mob-page-title">Nutrition</div>
+                    <div class="mob-nut-content" id="mob-nut-content"></div>
+                </div>
+                <!-- Mobile Ask -->
+                <div class="mob-view" id="mob-ask">
+                    <div class="mob-page-title">Ask APEX</div>
+                    <div class="mob-chat-messages" id="mob-chat-messages"></div>
+                    <div class="mob-chat-input-row">
+                        <input type="text" class="mob-chat-input" id="mob-chat-input" placeholder="Ask..."
+                            onkeydown="if(event.key==='Enter')sendMobileChat()">
+                        <button class="mob-chat-send" onclick="sendMobileChat()">→</button>
+                    </div>
+                </div>
+            </div>
+            <div class="phone-bottom-nav">
+                <div class="phone-tab active" onclick="switchMobTab('home',this)">
+                    <span class="phone-tab-icon">⌂</span><span>Home</span>
+                </div>
+                <div class="phone-tab" onclick="switchMobTab('sectors',this)">
+                    <span class="phone-tab-icon">◎</span><span>Sectors</span>
+                </div>
+                <div class="phone-tab" onclick="switchMobTab('history',this)">
+                    <span class="phone-tab-icon">📅</span><span>History</span>
+                </div>
+                <div class="phone-tab" onclick="switchMobTab('nutrition',this)">
+                    <span class="phone-tab-icon">🥗</span><span>Nutrition</span>
+                </div>
+                <div class="phone-tab" onclick="switchMobTab('ask',this)">
+                    <span class="phone-tab-icon">💬</span><span>Ask</span>
+                </div>
+            </div>
+            <div class="phone-home-indicator"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- CHECK-IN MODAL                                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="checkin-modal" style="display:none" onclick="if(event.target===this)closeCheckin()">
+        <div class="modal-card checkin-card">
+            <div class="modal-title">☀ Morning Check-in</div>
+            <div class="modal-subtitle" id="checkin-date"></div>
+            <div class="checkin-field">
+                <label>Energy on waking</label>
+                <input type="range" min="1" max="10" value="7" class="checkin-slider" id="ci-energy">
+                <span class="checkin-val" id="ci-energy-val">7</span>
+            </div>
+            <div class="checkin-field">
+                <label>Mood</label>
+                <input type="range" min="1" max="10" value="7" class="checkin-slider" id="ci-mood">
+                <span class="checkin-val" id="ci-mood-val">7</span>
+            </div>
+            <div class="checkin-field">
+                <label>Libido</label>
+                <input type="range" min="1" max="10" value="7" class="checkin-slider" id="ci-libido">
+                <span class="checkin-val" id="ci-libido-val">7</span>
+            </div>
+            <div class="checkin-field">
+                <label>SR Day</label>
+                <div class="sr-day-row">
+                    <span class="sr-day-count" id="ci-sr-day">14</span>
+                    <button class="sr-reset-btn" onclick="resetSR()">Reset Streak</button>
+                </div>
+            </div>
+            <div class="checkin-field">
+                <label>Notes (optional)</label>
+                <textarea class="checkin-notes" id="ci-notes" placeholder="How are you feeling?"></textarea>
+            </div>
+            <button class="modal-submit" onclick="submitCheckin()">Submit Check-in ✓</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- MEAL LOG MODAL                                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="meal-modal" style="display:none" onclick="if(event.target===this)closeMealLog()">
+        <div class="modal-card meal-card">
+            <div class="modal-title">+ Log Meal</div>
+            <div class="meal-field">
+                <label>Meal Type</label>
+                <select class="meal-select" id="ml-type">
+                    <option value="Breakfast">🌅 Breakfast</option>
+                    <option value="Lunch">☀ Lunch</option>
+                    <option value="Dinner">🌙 Dinner</option>
+                    <option value="Snack">🍎 Snack</option>
+                    <option value="Supplement">💊 Supplement</option>
+                </select>
+            </div>
+            <div class="meal-field">
+                <label>Food Name / Description</label>
+                <input type="text" class="meal-input" id="ml-name" placeholder="e.g. Raw milk + 6 eggs + liver">
+            </div>
+            <div class="meal-macros-row">
+                <div class="meal-field small">
+                    <label>Calories</label>
+                    <input type="number" class="meal-input" id="ml-kcal" placeholder="850">
+                </div>
+                <div class="meal-field small">
+                    <label>Protein (g)</label>
+                    <input type="number" class="meal-input" id="ml-protein" placeholder="62">
+                </div>
+                <div class="meal-field small">
+                    <label>Fat (g)</label>
+                    <input type="number" class="meal-input" id="ml-fat" placeholder="48">
+                </div>
+                <div class="meal-field small">
+                    <label>Carbs (g)</label>
+                    <input type="number" class="meal-input" id="ml-carbs" placeholder="35">
+                </div>
+            </div>
+            <button class="modal-submit" onclick="submitMeal()">Add to Feed ✓</button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/app.js"></script>
+</body>
+
+</html>

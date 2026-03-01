@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(python -c \":*)",
+      "Bash(chcp 6500)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \":*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npx)",
+      "Bash(echo \"PATH: $PATH\")"
+    ]
+  }
+}
