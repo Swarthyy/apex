@@ -232,7 +232,7 @@ function go(viewId) {
   }
 
   // Render view content
-  const sectors = ['retention', 'sleep', 'energy', 'gym', 'libido', 'nutrition-sector', 'body', 'mood', 'finances', 'business'];
+  const sectors = ['retention', 'sleep', 'energy', 'gym', 'libido', 'nutrition-sector', 'body', 'mood'];
   if (viewId === 'dashboard') {
     renderDashboard();
     renderRightPanel();
