@@ -6,6 +6,7 @@ import { renderDashboard, renderRightPanel, renderSectorView, renderInsightsList
 import { initCalendar, renderCalendar, calNavPrev, calNavNext, setCalView, autoSelectToday } from './calendar.js';
 import { renderNutritionFeed, nutNavPrev, nutNavNext } from './nutrition.js';
 import { getChatResponse } from './chat.js';
+import { renderFinanceView, toggleSandboxEvent, removeSandboxEvent, openAddEventModal, closeAddEventModal, submitNewEvent } from './finance.js';
 import {
   getMode, setMode, isLiveMode, isAuthenticated, getToken,
   apiLogin, apiSignup, apiLogout, apiSubmitCheckin, apiSubmitMeal, apiSendChat,
@@ -245,6 +246,8 @@ function go(viewId) {
     setTimeout(() => { renderCalendar(); autoSelectToday(); }, 50);
   } else if (viewId === 'nutrition') {
     setTimeout(() => renderNutritionFeed(), 50);
+  } else if (viewId === 'finances') {
+    setTimeout(() => renderFinanceView(), 50);
   }
 }
 
@@ -605,3 +608,9 @@ window.showLogin = showLogin;
 window.showSignup = showSignup;
 window.enterDemoMode = enterDemoMode;
 window.toggleMode = toggleMode;
+// Finance functions
+window.toggleSandboxEvent = toggleSandboxEvent;
+window.removeSandboxEvent = removeSandboxEvent;
+window.openAddEventModal = openAddEventModal;
+window.closeAddEventModal = closeAddEventModal;
+window.submitNewEvent = submitNewEvent;

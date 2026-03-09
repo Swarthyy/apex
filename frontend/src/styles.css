@@ -2778,3 +2778,579 @@ body {
 
 /* Fix inline display */
 #view-landing.active { display: flex !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINANCE SECTOR — Bloomberg Terminal Aesthetic
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────────────────────────────────────── */
+.fin-page-header {
+  margin-bottom: 24px;
+}
+
+.fin-page-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--teal);
+  letter-spacing: -1px;
+}
+
+.fin-page-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Liquidity HUD ───────────────────────────────────────────────────────── */
+.fin-hud {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.fin-account-card {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.25s ease;
+  animation: finCardIn 0.4s ease both;
+  position: relative;
+  overflow: hidden;
+}
+
+.fin-account-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.fin-account-card:hover {
+  border-color: rgba(0, 212, 170, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.06);
+}
+
+.fin-account-card:hover::before {
+  opacity: 1;
+}
+
+.fin-acc-total {
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.06), rgba(0, 212, 170, 0.02));
+  border-color: rgba(0, 212, 170, 0.15);
+}
+
+.fin-acc-icon {
+  font-size: 18px;
+  color: var(--teal);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 212, 170, 0.08);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.fin-acc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fin-acc-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-acc-type {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+}
+
+.fin-acc-balance {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+.fin-acc-balance.low {
+  color: var(--orange);
+}
+
+@keyframes finCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Safe-to-Spend Hero ──────────────────────────────────────────────────── */
+.fin-safe-spend {
+  text-align: center;
+  padding: 28px 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(180deg, rgba(0, 212, 170, 0.04) 0%, transparent 100%);
+  border: 1px solid rgba(0, 212, 170, 0.1);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fin-safe-spend::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.03), transparent);
+  animation: safeShimmer 4s ease-in-out infinite;
+}
+
+@keyframes safeShimmer {
+  0% { left: -50%; }
+  100% { left: 150%; }
+}
+
+.fin-safe-label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.fin-safe-value {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 64px;
+  color: var(--teal);
+  line-height: 1;
+  letter-spacing: -3px;
+  text-shadow: 0 0 60px rgba(0, 212, 170, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.fin-safe-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.fin-safe-projected {
+  color: var(--teal);
+  font-weight: 500;
+}
+
+/* ── Sandbox Row ─────────────────────────────────────────────────────────── */
+.fin-sandbox-row {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* ── Sandbox Ledger ──────────────────────────────────────────────────────── */
+.fin-ledger {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.fin-ledger-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.fin-ledger-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.fin-add-event-btn {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid rgba(0, 212, 170, 0.2);
+  color: var(--teal);
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.fin-add-event-btn:hover {
+  background: rgba(0, 212, 170, 0.2);
+  transform: translateY(-1px);
+}
+
+.fin-ledger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fin-event-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.fin-event-row:hover {
+  border-color: var(--border);
+}
+
+.fin-event-row.disabled {
+  opacity: 0.35;
+}
+
+.fin-event-row.disabled .fin-event-label {
+  text-decoration: line-through;
+}
+
+/* Toggle Switch */
+.fin-toggle {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.fin-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.fin-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--muted2);
+  border-radius: 18px;
+  transition: background 0.2s;
+}
+
+.fin-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 2px;
+  bottom: 2px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.fin-toggle input:checked + .fin-toggle-slider {
+  background: rgba(0, 212, 170, 0.3);
+}
+
+.fin-toggle input:checked + .fin-toggle-slider::before {
+  transform: translateX(14px);
+  background: var(--teal);
+}
+
+.fin-event-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fin-event-label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.fin-event-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.fin-event-amount {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.fin-event-amount.positive {
+  color: var(--teal);
+}
+
+.fin-event-amount.negative {
+  color: var(--red);
+}
+
+.fin-event-delete {
+  background: none;
+  border: none;
+  color: var(--muted2);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.fin-event-delete:hover {
+  color: var(--red);
+}
+
+/* ── Burn Graph ──────────────────────────────────────────────────────────── */
+.fin-graph {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.fin-graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.fin-graph-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.fin-graph-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 500;
+  color: var(--teal);
+  background: rgba(0, 212, 170, 0.08);
+  border: 1px solid rgba(0, 212, 170, 0.15);
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: 1.5px;
+}
+
+.fin-graph-canvas {
+  width: 100%;
+  overflow: hidden;
+}
+
+.fin-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Scan-line animation */
+.fin-scanline {
+  animation: scanSweep 3s linear infinite;
+}
+
+@keyframes scanSweep {
+  0% { transform: translateX(0); opacity: 0.15; }
+  50% { opacity: 0.25; }
+  100% { transform: translateX(460px); opacity: 0; }
+}
+
+/* ── Recent Transactions ─────────────────────────────────────────────────── */
+.fin-transactions {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.fin-tx-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.fin-tx-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.fin-tx-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.fin-tx-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.fin-tx-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  animation: finCardIn 0.3s ease both;
+}
+
+.fin-tx-row:last-child {
+  border-bottom: none;
+}
+
+.fin-tx-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fin-tx-merchant {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-tx-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  background: var(--surface2);
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.fin-tx-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.fin-tx-amount {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text2);
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: right;
+}
+
+.fin-tx-amount.positive {
+  color: var(--teal);
+}
+
+/* ── Add Event Modal ─────────────────────────────────────────────────────── */
+.fin-event-card {
+  max-width: 420px;
+  width: 90%;
+}
+
+.fin-ev-field {
+  margin-bottom: 14px;
+}
+
+.fin-ev-field label {
+  display: block;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.fin-ev-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.fin-ev-input:focus {
+  border-color: var(--teal);
+}
+
+.fin-ev-input::placeholder {
+  color: var(--muted2);
+}
+
+.fin-ev-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fin-sandbox-row {
+    grid-template-columns: 1fr;
+  }
+  .fin-hud {
+    flex-wrap: wrap;
+  }
+  .fin-account-card {
+    min-width: 140px;
+  }
+  .fin-safe-value {
+    font-size: 48px;
+  }
+}

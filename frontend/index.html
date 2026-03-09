@@ -8,7 +8,7 @@
     <meta name="description"
         content="APEX Personal Intelligence Dashboard — aggregate biometric, behavioural, and lifestyle data into actionable insights.">
     <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/src/styles.css">
 </head>
@@ -364,11 +364,31 @@
 
         <div class="view" id="view-finances">
             <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
-            <div class="sector-header" style="color:var(--teal)">Finances <span class="sector-subtitle">Manual
-                    Tracking</span></div>
-            <div class="sector-stats" id="finances-stats"></div>
-            <div class="sector-chart" id="finances-chart"></div>
-            <div class="sector-table" id="finances-table"></div>
+            <div class="fin-page-header">
+                <div class="fin-page-title">Finances</div>
+                <div class="fin-page-subtitle">Up Bank · Cash Flow Sandbox</div>
+            </div>
+
+            <!-- Liquidity HUD -->
+            <div class="fin-hud" id="fin-hud"></div>
+
+            <!-- Safe-to-Spend Hero -->
+            <div class="fin-safe-spend" id="fin-safe-spend"></div>
+
+            <!-- Sandbox Row: Ledger + Burn Graph -->
+            <div class="fin-sandbox-row">
+                <div class="fin-ledger" id="fin-ledger"></div>
+                <div class="fin-graph">
+                    <div class="fin-graph-header">
+                        <div class="fin-graph-title">60-Day Projection</div>
+                        <div class="fin-graph-badge">SIMULATED</div>
+                    </div>
+                    <div class="fin-graph-canvas" id="fin-graph-canvas"></div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="fin-transactions" id="fin-transactions"></div>
         </div>
 
         <div class="view" id="view-business">
@@ -716,6 +736,46 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- TOAST CONTAINER                                                        -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- ADD EVENT MODAL                                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="fin-event-modal" style="display:none" onclick="if(event.target===this)closeAddEventModal()">
+        <div class="modal-card fin-event-card">
+            <div class="modal-title">+ New Sandbox Event</div>
+            <div class="fin-ev-field">
+                <label>Label</label>
+                <input type="text" class="fin-ev-input" id="fin-ev-label" placeholder="e.g. Salary, Rent, Noah">
+            </div>
+            <div class="fin-ev-field">
+                <label>Amount ($)</label>
+                <input type="number" class="fin-ev-input" id="fin-ev-amount" placeholder="4500">
+            </div>
+            <div class="fin-ev-row">
+                <div class="fin-ev-field">
+                    <label>Date</label>
+                    <input type="date" class="fin-ev-input" id="fin-ev-date">
+                </div>
+                <div class="fin-ev-field">
+                    <label>Type</label>
+                    <select class="fin-ev-input" id="fin-ev-type">
+                        <option value="income">Income (+)</option>
+                        <option value="obligation">Obligation (−)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fin-ev-field">
+                <label>Recurring</label>
+                <select class="fin-ev-input" id="fin-ev-recurring">
+                    <option value="">One-time</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="fortnightly">Fortnightly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <button class="modal-submit" onclick="submitNewEvent()">Add to Sandbox ✓</button>
+        </div>
+    </div>
+
     <div class="toast-container" id="toast-container"></div>
 
     <script type="module" src="/src/app.js"></script>
