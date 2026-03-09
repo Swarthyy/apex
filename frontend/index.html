@@ -16,9 +16,68 @@
 <body>
 
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- AUTH SCREEN                                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="auth-screen" id="auth-screen" style="display:none">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <span class="logo-icon">◆</span>
+                <span class="logo-text">APEX</span>
+            </div>
+            <div class="auth-subtitle">The dashboard for your life</div>
+
+            <!-- Login Form -->
+            <div class="auth-form" id="auth-login">
+                <div class="auth-form-title">Sign In</div>
+                <div class="auth-error" id="login-error" style="display:none"></div>
+                <div class="auth-field">
+                    <label>Email</label>
+                    <input type="email" class="auth-input" id="login-email" placeholder="you@example.com"
+                        onkeydown="if(event.key==='Enter')handleLogin()">
+                </div>
+                <div class="auth-field">
+                    <label>Password</label>
+                    <input type="password" class="auth-input" id="login-password" placeholder="••••••••"
+                        onkeydown="if(event.key==='Enter')handleLogin()">
+                </div>
+                <button class="auth-submit" onclick="handleLogin()">Sign In →</button>
+                <div class="auth-switch">Don't have an account? <a onclick="showSignup()">Create one</a></div>
+                <div class="auth-divider"><span>or</span></div>
+                <button class="auth-demo-btn" onclick="enterDemoMode()">Continue in Demo Mode</button>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="auth-form" id="auth-signup" style="display:none">
+                <div class="auth-form-title">Create Account</div>
+                <div class="auth-error" id="signup-error" style="display:none"></div>
+                <div class="auth-field">
+                    <label>Full Name</label>
+                    <input type="text" class="auth-input" id="signup-name" placeholder="Jett"
+                        onkeydown="if(event.key==='Enter')handleSignup()">
+                </div>
+                <div class="auth-field">
+                    <label>Email</label>
+                    <input type="email" class="auth-input" id="signup-email" placeholder="you@example.com"
+                        onkeydown="if(event.key==='Enter')handleSignup()">
+                </div>
+                <div class="auth-field">
+                    <label>Password</label>
+                    <input type="password" class="auth-input" id="signup-password" placeholder="Min 8 characters"
+                        onkeydown="if(event.key==='Enter')handleSignup()">
+                </div>
+                <button class="auth-submit" onclick="handleSignup()">Create Account →</button>
+                <div class="auth-switch">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+                <div class="auth-divider"><span>or</span></div>
+                <button class="auth-demo-btn" onclick="enterDemoMode()">Continue in Demo Mode</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- TOPBAR                                                                 -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="topbar">
+    <div class="topbar" id="app-topbar" style="display:none">
         <div class="topbar-left">
             <div class="logo" onclick="go('dashboard')">
                 <span class="logo-icon">◆</span>
@@ -33,15 +92,17 @@
             </div>
         </div>
         <div class="topbar-right">
+            <div class="mode-chip" id="mode-chip" onclick="toggleMode()">DEMO</div>
             <div class="date-chip" id="date-chip"></div>
             <button class="btn-checkin" id="btn-checkin" onclick="openCheckin()">☀ Morning Check-in</button>
+            <button class="btn-logout" id="btn-logout" onclick="handleLogout()" style="display:none">Logout</button>
         </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- SIDEBAR                                                                -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="sidebar">
+    <div class="sidebar" id="app-sidebar" style="display:none">
         <div class="sidebar-section">
             <div class="sidebar-label">OVERVIEW</div>
             <div class="sidebar-item active" data-view="dashboard" onclick="go('dashboard')">
@@ -95,10 +156,119 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- MAIN CONTENT AREA                                                      -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="main-content">
+    <div class="main-content" id="main-content">
+
+        <!-- ─── LANDING VIEW ───────────────────────────────────────────────── -->
+        <div class="view active" id="view-landing"
+            style="padding: 0; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at center, #1a1a24 0%, var(--bg) 100%);">
+
+            <div class="landing-hero"
+                style="text-align: center; max-width: 800px; padding: 2rem; animation: fadeUp 1s ease-out;">
+
+                <div class="landing-badge"
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; margin-bottom: 2rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; color: var(--muted); text-transform: uppercase;">
+                    <span style="color: var(--accent);">◆</span> APEX 2.0 IS LIVE
+                </div>
+
+                <h1
+                    style="font-size: clamp(3rem, 8vw, 5.5rem); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -2px; font-weight: 800; background: linear-gradient(135deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    The Dashboard<br>For Your Life.
+                </h1>
+
+                <p
+                    style="font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--muted); line-height: 1.6; margin-bottom: 3rem; max-width: 600px; margin-inline: auto; font-family: 'DM Mono', monospace;">
+                    Aggregate your biometric, behavioral, and financial data into a single, actionable intelligence hub.
+                </p>
+
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button class="landing-btn-primary" onclick="showAuthScreen(); showSignup()"
+                        style="padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; border-radius: 100px; background: var(--accent); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 30px rgba(78,205,196,0.3);">
+                        Create Account
+                    </button>
+                    <button class="landing-btn-secondary" onclick="enterDemoMode()"
+                        style="padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; border-radius: 100px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);">
+                        View Demo UI
+                    </button>
+                </div>
+
+                <div style="margin-top: 3rem; font-size: 0.9rem; color: var(--muted2);">
+                    Already a member? <a onclick="showAuthScreen(); showLogin()"
+                        style="color: var(--text); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Sign
+                        in</a>
+                </div>
+            </div>
+
+            <div class="landing-visual"
+                style="margin-top: 2rem; width: 100%; max-width: 1200px; height: 400px; position: relative; perspective: 1000px;">
+                <div
+                    style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, var(--bg)); z-index: 10;">
+                </div>
+                <div
+                    style="width: 100%; height: 100%; background: var(--surface); border-radius: 16px 16px 0 0; border: 1px solid rgba(255,255,255,0.05); transform: rotateX(20deg) translateY(50px); box-shadow: 0 -20px 100px rgba(0,0,0,0.5); overflow: hidden; display: flex;">
+
+                    <!-- Faux App UI for Visuals -->
+                    <div style="width: 250px; border-right: 1px solid rgba(255,255,255,0.05); padding: 2rem 1.5rem;">
+                        <div
+                            style="height: 12px; width: 60%; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 2rem;">
+                        </div>
+                        <div
+                            style="height: 12px; width: 80%; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 1rem;">
+                        </div>
+                        <div
+                            style="height: 12px; width: 70%; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 1rem;">
+                        </div>
+                        <div
+                            style="height: 12px; width: 90%; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 1rem;">
+                        </div>
+                    </div>
+                    <div style="flex: 1; padding: 2rem;">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <div
+                                style="flex: 1; height: 120px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                            </div>
+                            <div
+                                style="flex: 1; height: 120px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                            </div>
+                            <div
+                                style="flex: 1; height: 120px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                            </div>
+                        </div>
+                        <div
+                            style="height: 200px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <style>
+                .landing-btn-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 40px rgba(78, 205, 196, 0.4);
+                    filter: brightness(1.1);
+                }
+
+                .landing-btn-secondary:hover {
+                    background: rgba(255, 255, 255, 0.1) !important;
+                    transform: translateY(-2px);
+                }
+
+                @keyframes fadeUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            </style>
+        </div>
 
         <!-- ─── DASHBOARD VIEW ─────────────────────────────────────────────── -->
-        <div class="view active" id="view-dashboard">
+        <div class="view" id="view-dashboard">
             <div class="stat-tiles" id="stat-tiles"></div>
 
             <div class="insights-row" id="insights-row"></div>
@@ -176,7 +346,8 @@
         <div class="view" id="view-body">
             <button class="back-btn" onclick="go('dashboard')">← Dashboard</button>
             <div class="sector-header" style="color:var(--purple)">Body Composition <span
-                    class="sector-subtitle">Withings API</span></div>
+                    class="sector-subtitle">Withings
+                    API</span></div>
             <div class="sector-stats" id="body-stats"></div>
             <div class="sector-chart" id="body-chart"></div>
             <div class="sector-table" id="body-table"></div>
@@ -368,7 +539,7 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- RIGHT PANEL (Dashboard)                                                -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="right-panel" id="right-panel">
+    <div class="right-panel" id="right-panel" style="display:none">
         <div class="rp-section">
             <div class="rp-title">Notifications</div>
             <div class="rp-notifications" id="rp-notifications"></div>
@@ -392,7 +563,7 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- MOBILE TOGGLE + PHONE OVERLAY                                          -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="toggleMobile()">📱</button>
+    <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="toggleMobile()" style="display:none">📱</button>
 
     <div class="mobile-overlay" id="mobile-overlay" style="display:none">
         <div class="phone-shell">
@@ -541,6 +712,11 @@
             <button class="modal-submit" onclick="submitMeal()">Add to Feed ✓</button>
         </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- TOAST CONTAINER                                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="toast-container" id="toast-container"></div>
 
     <script type="module" src="/src/app.js"></script>
 </body>
