@@ -8,10 +8,7 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(where npx)",
       "Bash(echo \"PATH: $PATH\")",
-      "Bash(timeout 10 npm run dev:*)",
-      "Bash(lsof:*)",
-      "Bash(xargs:*)",
-      "Bash(chmod:*)"
+      "WebFetch(domain:www.youtube.com)"
     ]
   }
 }

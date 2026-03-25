@@ -14,6 +14,7 @@ import insightsRoutes from './routes/insights';
 import vitalityRoutes from './routes/vitality';
 import dashboardRoutes from './routes/dashboard';
 import chatRoutes from './routes/chat';
+import onboardingRoutes from './routes/onboarding';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -42,6 +43,7 @@ app.use('/api/insights', insightsRoutes);
 app.use('/api/vitality', vitalityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

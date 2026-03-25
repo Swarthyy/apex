@@ -3,6 +3,8 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 import { calendarEventSchema } from '../validators/schemas';
 import { supabaseAdmin } from '../lib/supabase';
 import { z } from 'zod';
+import ical from 'node-ical';
+import { addDays, isAfter, isBefore } from 'date-fns';
 
 const router = Router();
 
@@ -26,7 +28,7 @@ router.post('/events', requireAuth, async (req: AuthRequest, res) => {
     const category = body.category || autoCategorize(body.title, body.description);
     const auto_categorized = !body.category;
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await (supabaseAdmin as any)
       .from('calendar_events')
       .insert({
         user_id: req.userId!,
@@ -68,6 +70,79 @@ router.get('/events', requireAuth, async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Get calendar events error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Sync from ICS URL (Google Calendar)
+router.post('/sync', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const { calendarUrl } = req.body;
+    if (!calendarUrl) {
+      return res.status(400).json({ error: 'calendarUrl is required' });
+    }
+
+    const events = await ical.async.fromURL(calendarUrl);
+    const now = new Date();
+    const horizon = addDays(now, 30); // Sync 30 days ahead
+
+    const eventsToInsert = [];
+
+    for (const v of Object.values(events)) {
+      if (v && v.type === 'VEVENT') {
+        const event = v as any;
+        const start = Array.isArray(event.start) ? event.start[0] : event.start;
+        const end = Array.isArray(event.end) ? event.end[0] : event.end;
+
+        if (!start || !end) continue;
+
+        // Filter out past events and far future events
+        if (isBefore(new Date(start), now) && isBefore(new Date(end), now)) continue;
+        if (isAfter(new Date(start), horizon)) continue;
+
+        const title = event.summary?.val || event.summary || 'Google Calendar Event';
+        const description = event.description?.val || event.description || '';
+        const category = autoCategorize(title, description);
+
+        // Map to DB schema
+        eventsToInsert.push({
+          user_id: req.userId!,
+          title: title.substring(0, 255),
+          description: description.substring(0, 1000),
+          event_date: (start as Date).toISOString().split('T')[0],
+          start_time: (start as Date).toISOString(),
+          end_time: (end as Date).toISOString(),
+          category,
+          auto_categorized: true
+        });
+      }
+    }
+
+    // Upsert into Supabase
+    // We don't have a unique constraint specifically, but we can just use insert for now 
+    // or ideally delete future events and re-insert to avoid duplicates.
+
+    // Delete future auto-categorized events for this user
+    await (supabaseAdmin as any)
+      .from('calendar_events')
+      .delete()
+      .eq('user_id', req.userId!)
+      .eq('auto_categorized', true)
+      .gte('start_time', now.toISOString());
+
+    if (eventsToInsert.length > 0) {
+      const { error } = await (supabaseAdmin as any)
+        .from('calendar_events')
+        .insert(eventsToInsert);
+
+      if (error) {
+        console.error("DB Insert error during calendar sync:", error);
+      }
+    }
+
+    res.json({ success: true, syncedCount: eventsToInsert.length });
+  } catch (error) {
+    console.error('Calendar sync error:', error);
+    res.status(500).json({ error: 'Failed to sync calendar' });
   }
 });
 

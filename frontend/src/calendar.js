@@ -130,7 +130,74 @@ function renderYear() {
         row.appendChild(monthGrid);
         grid.appendChild(row);
     }
+
+    renderMobileHistory();
 }
+
+function renderMobileHistory() {
+    const container = document.getElementById('mobile-history-view');
+    if (!container) return;
+
+    // APEX uses a hardcoded "today" reference for demo currently
+    const refDate = new Date(2026, 1, 27);
+
+    let html = `<div class="mh-trend-container"><svg width="100%" height="100%" viewBox="0 0 140 60" preserveAspectRatio="none">`;
+    html += `<defs><linearGradient id="mh-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="rgba(200,241,53,0)"/></linearGradient></defs>`;
+
+    let points = [];
+    let daysHtml = '<div class="mh-day-list">';
+
+    let dayDataList = [];
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(refDate);
+        d.setDate(d.getDate() - i);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const dd = d.getDate();
+        const data = getData(y, m, dd) || { vitality: 0 };
+        dayDataList.push({ y, m, dd, vitality: data.vitality });
+    }
+
+    let pathD = `M 0,60 `;
+    dayDataList.forEach((d, i) => {
+        const x = (i / 13) * 140;
+        const y = 60 - ((d.vitality / 10) * 50);
+        points.push(`${x},${y}`);
+        if (i === 0) pathD = `M ${x},${y} `;
+        else pathD += `L ${x},${y} `;
+    });
+
+    html += `<path class="mh-trend-area" d="${pathD} L 140,60 L 0,60 Z" />`;
+    html += `<polyline class="mh-trend-line" points="${points.join(' ')}" />`;
+    html += `</svg></div>`;
+
+    dayDataList.reverse().forEach(d => {
+        const dateStr = `${SHORT_MONTHS[d.m]} ${d.dd}`;
+        const color = scoreToColor(d.vitality);
+        daysHtml += `
+          <div class="mh-day-row" onclick="selectDayFromMobile(${d.y}, ${d.m}, ${d.dd}, this)">
+             <div class="mh-date">${dateStr}</div>
+             <div class="mh-score-pill" style="background:${color}">${d.vitality}</div>
+          </div>
+        `;
+    });
+
+    daysHtml += '</div>';
+    html += daysHtml;
+
+    container.innerHTML = html;
+}
+
+window.selectDayFromMobile = function (y, m, dd, el) {
+    document.querySelectorAll('.mh-day-row.selected').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    selectDay(y, m, dd, null);
+    // Smooth scroll to the details panel on mobile
+    const detailHeader = document.getElementById('history-detail');
+    if (detailHeader && window.innerWidth <= 768) {
+        detailHeader.scrollIntoView({ behavior: 'smooth' });
+    }
+};
 
 function renderSparklines() {
     const rows = document.getElementById('sparkline-rows');

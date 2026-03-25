@@ -2,115 +2,188 @@
 // APEX — Demo Data Store (with real Hevy gym data)
 // ═══════════════════════════════════════════════════════════════════════════
 import { getWorkoutsForDate, getGymSummary, getAllWorkouts } from './hevy.js';
+import { apiClient } from './apiClient.js';
 
-// Seeded random for consistent demo data
+// Seeded random for consistent demo data (can eventually be removed)
 function seededRandom(seed) {
     let s = seed;
     return function () { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
 }
 
-// Generate 90 days of demo data
+// Data Store
 const DEMO_DATA = {};
-const TODAY = new Date(2026, 1, 27); // Feb 27, 2026
+const TODAY = new Date();
+export let UPCOMING_EVENTS = [];
 
-function initData() {
+export async function loadDashboardData() {
+    const end = new Date(TODAY);
+    const start = new Date(TODAY);
+    start.setDate(end.getDate() - 90);
+
+    const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+    const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+
+    // Clear data
+    for (let key in DEMO_DATA) delete DEMO_DATA[key];
+
+    // Set 90 empty days
     for (let i = 90; i >= 0; i--) {
         const d = new Date(TODAY);
         d.setDate(d.getDate() - i);
         const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-        const rng = seededRandom(d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate());
-
-        const srDay = Math.max(1, Math.floor(rng() * 30) + 1);
-        const srBoost = Math.min(2, srDay * 0.08);
-        const sleep = +(5.5 + rng() * 3.5).toFixed(1);
-        const energy = Math.min(10, Math.max(1, Math.round(4 + rng() * 5 + srBoost)));
-        const mood = Math.min(10, Math.max(1, Math.round(4 + rng() * 5 + srBoost * 0.5)));
-        const libido = Math.min(10, Math.max(1, Math.round(3 + rng() * 6 + srBoost)));
-        const weight = +(82 + rng() * 4 - i * 0.01).toFixed(1);
-
-        // Use real Hevy data for gym sessions
-        const hevyWorkouts = getWorkoutsForDate(d.getFullYear(), d.getMonth(), d.getDate());
-        const hasGym = hevyWorkouts.length > 0;
-        const hadLiver = rng() > 0.55;
-        const hadRawMilk = rng() > 0.3;
-        const hadOysters = rng() > 0.8;
-        const bodyFat = +(12 + rng() * 4).toFixed(1);
-
-        // Vitality: Energy 25% + Mood 20% + Libido 20% + Sleep 20% + SR 15%
-        const sleepScore = Math.min(10, Math.max(1, Math.round((sleep / 9) * 10)));
-        const srScore = Math.min(10, Math.round(srDay / 3));
-        const vitality = +((energy * 0.25 + mood * 0.2 + libido * 0.2 + sleepScore * 0.2 + srScore * 0.15) * 1).toFixed(1);
-
-        // Event dots
-        const dots = [];
-        const events = [];
-        if (hasGym) {
-            dots.push('var(--orange)');
-            const w = hevyWorkouts[0];
-            const gymTime = w.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-            events.push({ label: w.title || 'Gym Session', time: gymTime, color: 'var(--orange)', type: 'gym' });
-        }
-        if (rng() > 0.6) { dots.push('var(--pink)'); events.push({ label: rng() > 0.5 ? 'Dinner with friends' : 'Coffee catch-up', time: rng() > 0.5 ? '7:00 PM' : '10:00 AM', color: 'var(--pink)', type: 'social' }); }
-        if (rng() > 0.4) { dots.push('var(--gold)'); events.push({ label: 'Work block', time: '9:00 AM', color: 'var(--gold)', type: 'work' }); }
-
-        // Nutrition logs
-        const meals = [];
-        const mealTypes = ['Breakfast', 'Lunch', 'Dinner'];
-        const mealNames = {
-            Breakfast: ['Raw milk + 6 eggs + honey', '4 eggs + sourdough + butter', 'Smoothie bowl + raw milk', 'Bone broth + eggs'],
-            Lunch: ['Grass-fed steak + rice + salad', 'Salmon + sweet potato', 'Liver + onions + rice', 'Chicken thighs + quinoa'],
-            Dinner: ['Raw milk + oysters + fruit', 'Lamb chops + vegetables', 'Beef mince + rice + greens', 'Tuna steak + mashed potato']
-        };
-        mealTypes.forEach((type, idx) => {
-            const names = mealNames[type];
-            const name = names[Math.floor(rng() * names.length)];
-            const kcal = Math.round(500 + rng() * 700);
-            const protein = Math.round(25 + rng() * 45);
-            const fat = Math.round(15 + rng() * 40);
-            const carbs = Math.round(20 + rng() * 60);
-            const bonuses = [];
-            if (protein > 45) bonuses.push('+High Protein');
-            if (name.includes('liver') || name.includes('Liver')) bonuses.push('+Vitamin A', '+B12');
-            if (name.includes('milk') || name.includes('Milk')) bonuses.push('+Raw Enzymes', '+CLA');
-            if (name.includes('oyster') || name.includes('Oyster')) bonuses.push('+Zinc', '+Omega-3');
-            if (name.includes('egg') || name.includes('Egg')) bonuses.push('+Choline');
-            if (name.includes('salmon') || name.includes('Salmon')) bonuses.push('+Omega-3');
-            if (name.includes('butter') || name.includes('Butter')) bonuses.push('+Fat-soluble Vitamins');
-            if (fat > 35) bonuses.push('+Sat. Fat');
-            if (carbs > 50) bonuses.push('+High Carb');
-            meals.push({
-                type, name, kcal, protein, fat, carbs, bonuses,
-                time: ['7:30 AM', '12:30 PM', '6:30 PM'][idx],
-                ingredients: name.split('+').map(s => s.trim()).filter(Boolean)
-            });
-        });
-        if (rng() > 0.5) {
-            meals.push({ type: 'Snack', name: 'Raw milk + honey', kcal: 280, protein: 12, fat: 14, carbs: 28, bonuses: ['+Raw Enzymes', '+CLA'], time: '3:30 PM', ingredients: ['Raw milk', 'Honey'] });
-        }
-
-        const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
-        const totalProtein = meals.reduce((s, m) => s + m.protein, 0);
-        const totalFat = meals.reduce((s, m) => s + m.fat, 0);
-        const totalCarbs = meals.reduce((s, m) => s + m.carbs, 0);
-        const nutScore = Math.min(10, Math.max(1, Math.round(
-            (Math.min(1, totalKcal / 3200) * 3 + Math.min(1, totalProtein / 200) * 3 +
-                (hadLiver ? 2 : 0) + (hadOysters ? 1 : 0) + (hadRawMilk ? 1 : 0))
-        )));
 
         DEMO_DATA[key] = {
-            date: new Date(d), energy, mood, libido, sleep, weight, bodyFat,
-            srDay, hasGym, hadLiver, hadRawMilk, hadOysters, vitality, dots, events,
-            meals, totalKcal, totalProtein, totalFat, totalCarbs, nutScore,
-            // Real gym data from Hevy
-            gymWorkouts: hevyWorkouts,
-            gymVolume: hevyWorkouts.reduce((s, w) => s + w.totalVolume, 0),
-            gymSets: hevyWorkouts.reduce((s, w) => s + w.totalSets, 0),
-            gymDuration: hevyWorkouts.reduce((s, w) => s + w.durationMin, 0),
+            date: new Date(d), energy: 0, mood: 0, libido: 0, sleep: 0, weight: 0, bodyFat: 0,
+            srDay: 0, hasGym: false, hadLiver: false, hadRawMilk: false, hadOysters: false, vitality: 0,
+            dots: [], events: [],
+            meals: [], totalKcal: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0, nutScore: 0,
+            gymWorkouts: [], gymVolume: 0, gymSets: 0, gymDuration: 0,
         };
+    }
+
+    const futureDate = new Date(TODAY);
+    futureDate.setDate(futureDate.getDate() + 30);
+    const futureStr = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-${String(futureDate.getDate()).padStart(2, '0')}`;
+
+    try {
+        const [checkinsRes, sleepRes, gymRes, bodyRes, calRes, upcomingCalRes] = await Promise.all([
+            apiClient(`/checkins?start_date=${startStr}&end_date=${endStr}`),
+            apiClient(`/sleep?start_date=${startStr}&end_date=${endStr}`),
+            apiClient(`/gym?start_date=${startStr}&end_date=${endStr}`),
+            apiClient(`/body-metrics?start_date=${startStr}&end_date=${endStr}`),
+            apiClient(`/calendar/events?start_date=${startStr}&end_date=${endStr}`),
+            apiClient(`/calendar/events?start_date=${endStr}&end_date=${futureStr}`),
+        ]);
+
+        (checkinsRes?.checkins || []).forEach(c => {
+            const d = new Date(c.check_date);
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[key]) {
+                DEMO_DATA[key].energy = c.energy_score || 0;
+                DEMO_DATA[key].mood = c.mood_score || 0;
+                DEMO_DATA[key].libido = c.libido_score || 0;
+                DEMO_DATA[key].srDay = c.sr_day_count || 0;
+            }
+        });
+
+        (sleepRes?.sleep_logs || []).forEach(s => {
+            const d = new Date(s.sleep_date);
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[key]) {
+                DEMO_DATA[key].sleep = s.duration_minutes ? +(s.duration_minutes / 60).toFixed(1) : 0;
+            }
+        });
+
+        (gymRes?.sessions || []).forEach(g => {
+            const d = new Date(g.session_date);
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[key]) {
+                DEMO_DATA[key].hasGym = true;
+                DEMO_DATA[key].gymVolume += g.total_volume || 0;
+                DEMO_DATA[key].gymSets += g.total_sets || 0;
+                DEMO_DATA[key].gymDuration += g.duration_minutes || 0;
+                DEMO_DATA[key].gymWorkouts.push({
+                    title: g.workout_name,
+                    durationMin: g.duration_minutes,
+                    totalVolume: g.total_volume,
+                    totalSets: g.total_sets,
+                    date: d,
+                    exercises: g.exercises || []
+                });
+                DEMO_DATA[key].dots.push('var(--orange)');
+            }
+        });
+
+        (bodyRes?.metrics || []).forEach(b => {
+            const d = new Date(b.measurement_date);
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[key]) {
+                DEMO_DATA[key].weight = b.weight_kg || 0;
+                DEMO_DATA[key].bodyFat = b.body_fat_percentage || 0;
+            }
+        });
+
+        (calRes?.events || []).forEach(e => {
+            const d = new Date(e.event_date);
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[key]) {
+                let color = 'var(--muted)';
+                if (e.category === 'work') color = 'var(--blue)';
+                if (e.category === 'social') color = 'var(--pink)';
+                if (e.category === 'health') color = 'var(--teal)';
+                if (e.category === 'gym') color = 'var(--orange)';
+
+                DEMO_DATA[key].events.push({
+                    label: e.title,
+                    time: new Date(e.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    color
+                });
+            }
+        });
+
+        UPCOMING_EVENTS = upcomingCalRes?.events || [];
+
+        // Recalculate vitality points
+        Object.values(DEMO_DATA).forEach(day => {
+            const sleepScore = Math.min(10, Math.max(1, Math.round((day.sleep / 9) * 10)));
+            const srScore = Math.min(10, Math.round(day.srDay / 3));
+            day.vitality = +((day.energy * 0.25 + day.mood * 0.2 + day.libido * 0.2 + sleepScore * 0.2 + srScore * 0.15)).toFixed(1);
+        });
+
+        // Add today's Google Calendar events directly into today's bucket if needed (can be added later)
+    } catch (e) {
+        console.error('Failed to load API data:', e);
     }
 }
 
-initData();
+// ── Seed from Onboarding ────────────────────────────────────────────────────
+export function seedFromOnboarding() {
+    let ob;
+    try { ob = JSON.parse(localStorage.getItem('apex_onboarding')); } catch { return; }
+    if (!ob) return;
+
+    const todayKey = `${TODAY.getFullYear()}-${TODAY.getMonth()}-${TODAY.getDate()}`;
+    const today = DEMO_DATA[todayKey];
+    if (!today) return;
+
+    // SR streak: set today and work backwards
+    if (ob.sr) {
+        const srDay = ob.sr.active ? (ob.sr.currentDay || 1) : 0;
+        today.srDay = srDay;
+        // Recalc vitality with real SR
+        const sleepScore = Math.min(10, Math.max(1, Math.round((today.sleep / 9) * 10)));
+        const srScore = Math.min(10, Math.round(srDay / 3));
+        today.vitality = +((today.energy * 0.25 + today.mood * 0.2 + today.libido * 0.2 + sleepScore * 0.2 + srScore * 0.15) * 1).toFixed(1);
+        // Backfill recent days with declining streak
+        for (let i = 1; i <= Math.min(srDay, 90); i++) {
+            const d = new Date(TODAY);
+            d.setDate(d.getDate() - i);
+            const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            if (DEMO_DATA[k]) {
+                DEMO_DATA[k].srDay = srDay - i;
+            }
+        }
+    }
+
+    // Body comp
+    if (ob.body) {
+        if (ob.body.currentWeight) today.weight = ob.body.currentWeight;
+        if (ob.body.bodyFat) today.bodyFat = ob.body.bodyFat;
+    }
+
+    // Sleep
+    if (ob.sleep) {
+        if (ob.sleep.hours) today.sleep = ob.sleep.hours;
+    }
+
+    // Energy / Mood
+    if (ob.energy?.level) today.energy = ob.energy.level;
+    if (ob.mood?.level) today.mood = ob.mood.level;
+    if (ob.libido?.level) today.libido = ob.libido.level;
+}
+
+seedFromOnboarding();
+
 
 export function getData(year, month, day) {
     return DEMO_DATA[`${year}-${month}-${day}`] || null;
@@ -146,7 +219,7 @@ export function addMeal(meal) {
     today.totalCarbs += meal.carbs;
 }
 
-export function updateCheckin(energy, mood, libido, srDay) {
+export async function updateCheckin(energy, mood, libido, srDay) {
     const today = getToday();
     if (!today) return;
     today.energy = energy;
@@ -156,6 +229,23 @@ export function updateCheckin(energy, mood, libido, srDay) {
     const sleepScore = Math.min(10, Math.max(1, Math.round((today.sleep / 9) * 10)));
     const srScore = Math.min(10, Math.round(srDay / 3));
     today.vitality = +((energy * 0.25 + mood * 0.2 + libido * 0.2 + sleepScore * 0.2 + srScore * 0.15)).toFixed(1);
+
+    // Save back to API
+    try {
+        const todayStr = `${TODAY.getFullYear()}-${String(TODAY.getMonth() + 1).padStart(2, '0')}-${String(TODAY.getDate()).padStart(2, '0')}`;
+        await apiClient('/checkins', {
+            method: 'POST',
+            body: {
+                check_date: todayStr,
+                energy_score: energy,
+                mood_score: mood,
+                libido_score: libido,
+                sr_day_count: srDay
+            }
+        });
+    } catch (err) {
+        console.error('Failed to save check-in to real backend:', err);
+    }
 }
 
 export function scoreToColor(v) {
